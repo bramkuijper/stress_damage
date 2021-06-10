@@ -3,7 +3,7 @@
 //
 // fecundity and seasonality
 //
-// May 2021, Exeter
+// June 2021, Exeter
 // **********************************************************************************
 
 
@@ -23,13 +23,8 @@
 #include <chrono>
 #include <string>
 
-
 // constants, type definitions, etc.
-
-using namespace std;
-
-const int seed        = time(0); // pseudo-random seed
-//const int seed      = << enter seed here >>;
+const int seed        = std::time(0); // pseudo-random seed
 
 double pLeave;   // probability that predator leaves
 double pArrive;  // probability that predator arrives
@@ -47,32 +42,82 @@ const int maxH        = 500;     // maximum hormone level
 const int skip        = 10;      // interval between print-outs
 const int maxTs = 100; // duration of a season
 
-ofstream outputfile;  // output file
-ofstream fwdCalcfile; // forward calculation output file
-ofstream attsimfile;  // simulated attacks output file
-stringstream outfile; // for naming output file
+std::ofstream outputfile;  // output file
+std::ofstream fwdCalcfile; // forward calculation output file
+std::ofstream attsimfile;  // simulated attacks output file
+std::stringstream outfile; // for naming output file
 
 // random numbers
-mt19937 mt(seed); // random number generator
-uniform_real_distribution<double> Uniform(0, 1); // real number between 0 and 1 (uniform)
+std::mt19937 mt(seed); // random number generator
+std::uniform_real_distribution<double> Uniform(0, 1); // real number between 0 and 1 (uniform)
 
-int hormone[maxT][maxTs][maxD+1];        // hormone level (strategy)
+///int hormone[maxT][maxTs][maxD+1];        // hormone level (strategy)
+std::vector < std::vector < std::vector<int> > > hormone; 
+
 double pKilled[maxH];             // probability of being killed by an attacking predator
 double mu[maxD+1];                // probability of background mortality, as a function of damage
 double dnew[maxD+1][maxH];        // new damage level, as a function of previous damage and hormone
 double repro[maxTs][maxD+1];       // reproductive output
-double Wopt[maxT][maxTs][maxD+1];        // fitness immediately after predator has/hasn't attacked, under optimal decision h
-double W[maxT][maxTs][maxD+1][maxH];     // expected fitness at start of time step, before predator does/doesn't attack
-double Wnext[maxT][maxTs][maxD+1][maxH]; // expected fitness at start of next time step
+//double Wopt[maxT][maxTs][maxD+1];        // fitness immediately after predator has/hasn't attacked, under optimal decision h
+std::vector < std::vector < std::vector<double> > > Wopt;
 
-double F[maxT][maxTs][maxD+1][maxH];     // frequency of individuals at start of time step, before predator does/doesn't attack
-double Fnext[maxT][maxTs][maxD+1][maxH]; // frequency of individuals at start of next time step
+std::vector < std::vector < std::vector < std::vector <double> > > > W;
+std::vector < std::vector < std::vector < std::vector <double> > > > Wnext;
+std::vector < std::vector < std::vector < std::vector <double> > > > F;
+std::vector < std::vector < std::vector < std::vector <double> > > > Fnext;
+
+
+
+//double W[maxT][maxTs][maxD+1][maxH];     // expected fitness at start of time step, before predator does/doesn't attack
+//double Wnext[maxT][maxTs][maxD+1][maxH]; // expected fitness at start of next time step
+//
+//double F[maxT][maxTs][maxD+1][maxH];     // frequency of individuals at start of time step, before predator does/doesn't attack
+//double Fnext[maxT][maxTs][maxD+1][maxH]; // frequency of individuals at start of next time step
 double pPred[maxT];               // probability that predator is present
 double totfitdiff;                // fitness difference between optimal strategy in successive iterations
 
 int i;     // iteration
 
 
+void InitVectors()
+{
+    int t, ts, d;
+    for (t=1;t<maxT;++t) // note that Wnext is undefined for t=0 because t=1 if predator has just attacked
+    {
+      std::vector < std::vector <int> > hormone_row;
+      std::vector < std::vector <double> > Wopt_row;
+      
+      std::vector < std::vector < std::vector <double> > > WF_superrow;
+
+      for (ts=0;ts<maxTs;++ts)
+      {
+          // intialize for all levels of damage
+        std::vector<int> hormone_col(0,maxD+1);
+        hormone_row.push_back(hormone_col);
+        
+        std::vector<double> Wopt_col(0.0,maxD+1);
+        Wopt_row.push_back(Wopt_col);
+
+        std::vector< std::vector < double > > WF_row;
+
+        for (d = 0; d<= maxD; ++d)
+        {
+            std::vector <double> WF_col(0.0,maxH);
+
+            WF_row.push_back(WF_col);
+        }
+
+        WF_superrow.push_back(WF_row);
+      }
+
+      hormone.push_back(hormone_row);
+      Wopt.push_back(Wopt_row);
+      W.push_back(WF_superrow);
+      Wnext.push_back(WF_superrow);
+      F.push_back(WF_superrow);
+      Fnext.push_back(WF_superrow);
+    }
+}
 
 
 /* SPECIFY FINAL FITNESS */
@@ -133,7 +178,7 @@ void Mortality()
 
   for (d=0;d<=maxD;++d)
   {
-    mu[d] = min(1.0,mu0 + Kmort*double(d));
+    mu[d] = std::min(1.0,mu0 + Kmort*double(d));
   }
 }
 
@@ -148,7 +193,7 @@ void Damage()
   {
     for (h=0;h<maxH;++h)
     {
-      dnew[d][h] = max(0.0,min(double(maxD),double(d) + 4.0*(double(h)/double(maxH))*(double(h)/double(maxH))-1.0));
+      dnew[d][h] = std::max(0.0,std::min(double(maxD),double(d) + 4.0*(double(h)/double(maxH))*(double(h)/double(maxH))-1.0));
     }
   }
 }
@@ -164,7 +209,7 @@ void Reproduction()
   { 
     for (d=0;d<=maxD;++d)
     {
-        repro[ts][d] = ts == 0 ? max(0.0, 1.0 - Kfec*double(d)) : 0.0;
+        repro[ts][d] = ts == 0 ? std::max(0.0, 1.0 - Kfec*double(d)) : 0.0;
     }
   }
 } // end Reproduction()
@@ -195,8 +240,8 @@ void OptDec()
 
               while (x1<x2)
               {
-                fitness_x1 = Wnext[min(maxT-1,t+1)][ts][d][x1]; // fitness as a function of h=x1
-                fitness_x2 = Wnext[min(maxT-1,t+1)][ts][d][x2]; // fitness as a function of h=x2
+                fitness_x1 = Wnext[std::min(maxT-1,t+1)][ts][d][x1]; // fitness as a function of h=x1
+                fitness_x2 = Wnext[std::min(maxT-1,t+1)][ts][d][x2]; // fitness as a function of h=x2
 
                 if (fitness_x1<fitness_x2)
                 {
@@ -278,7 +323,7 @@ void PrintStrat()
 {
   int t,d,ts;
 
-  outputfile << "t" << "\t" << "d" << "\t" << "ts" << "\t" << "hormone" << endl;
+  outputfile << "t" << "\t" << "d" << "\t" << "ts" << "\t" << "hormone" << std::endl;
 
   for (t=0;t<maxT;++t)
   {
@@ -288,15 +333,15 @@ void PrintStrat()
         {
             for (ts=0;ts<maxTs;++ts)
             {
-              outputfile << t << "\t" << d << "\t" << ts << "\t" << hormone[t][ts][d] << endl;
+              outputfile << t << "\t" << d << "\t" << ts << "\t" << hormone[t][ts][d] << std::endl;
             }
         }
       }
   }
 
-  outputfile << endl;
-  outputfile << "nIterations" << "\t" << i << endl;
-  outputfile << endl;
+  outputfile << std::endl;
+  outputfile << "nIterations" << "\t" << i << std::endl;
+  outputfile << std::endl;
 }
 
 
@@ -305,20 +350,20 @@ void PrintStrat()
 /* WRITE PARAMETER SETTINGS TO OUTPUT FILE */
 void PrintParams()
 {
-  outputfile << endl << "PARAMETER VALUES" << endl
-       << "pLeave: " << "\t" << pLeave << endl
-       << "pArrive: " << "\t" << pArrive << endl
-       << "pAttack: " << "\t" << pAttack << endl
-       << "alpha: " << "\t" << alpha << endl
-//       << "beta: " << "\t" << beta << endl
-       << "mu0: " << "\t" << mu0 << endl
-       << "Kmort: " << "\t" << Kmort << endl
-       << "Kfec: " << "\t" << Kfec << endl
-       << "maxI: " << "\t" << maxI << endl
-       << "maxT: " << "\t" << maxT << endl
-       << "maxTs: " << "\t" << maxTs << endl
-       << "maxD: " << "\t" << maxD << endl
-       << "maxH: " << "\t" << maxH << endl;
+  outputfile << std::endl << "PARAMETER VALUES" << std::endl
+       << "pLeave: " << "\t" << pLeave << std::endl
+       << "pArrive: " << "\t" << pArrive << std::endl
+       << "pAttack: " << "\t" << pAttack << std::endl
+       << "alpha: " << "\t" << alpha << std::endl
+//       << "beta: " << "\t" << beta << std::endl
+       << "mu0: " << "\t" << mu0 << std::endl
+       << "Kmort: " << "\t" << Kmort << std::endl
+       << "Kfec: " << "\t" << Kfec << std::endl
+       << "maxI: " << "\t" << maxI << std::endl
+       << "maxT: " << "\t" << maxT << std::endl
+       << "maxTs: " << "\t" << maxTs << std::endl
+       << "maxD: " << "\t" << maxD << std::endl
+       << "maxH: " << "\t" << maxH << std::endl;
 }
 
 
@@ -373,10 +418,10 @@ void fwdCalc()
                 h2=hormone[0][ts][d2];
                 Fnext[1][ts][d2][h2] += F[t][ts][d][h]*pPred[t]*pAttack*(1.0-pKilled[h])*(1.0-mu[d])*ddec;
                 // no attack
-                h1=hormone[min(maxT-1,t+1)][ts][d1];
-                Fnext[min(maxT-1,t+1)][ts][d1][h1] += F[t][ts][d][h]*(1.0-pPred[t]*pAttack)*(1.0-mu[d])*(1.0-ddec);
-                h2=hormone[min(maxT-1,t+1)][ts][d2];
-                Fnext[min(maxT-1,t+1)][ts][d2][h2] += F[t][ts][d][h]*(1.0-pPred[t]*pAttack)*(1.0-mu[d])*ddec;
+                h1=hormone[std::min(maxT-1,t+1)][ts][d1];
+                Fnext[std::min(maxT-1,t+1)][ts][d1][h1] += F[t][ts][d][h]*(1.0-pPred[t]*pAttack)*(1.0-mu[d])*(1.0-ddec);
+                h2=hormone[std::min(maxT-1,t+1)][ts][d2];
+                Fnext[std::min(maxT-1,t+1)][ts][d2][h2] += F[t][ts][d][h]*(1.0-pPred[t]*pAttack)*(1.0-mu[d])*ddec;
                 // deaths from predation and damage
                 predDeaths += F[t][ts][d][h]*pPred[t]*pAttack*pKilled[h];
                 damageDeaths += F[t][ts][d][h]*(1.0-pPred[t]*pAttack*pKilled[h])*mu[d];
@@ -398,7 +443,7 @@ void fwdCalc()
               for (h=0;h<maxH;h++)
               {
                 Fnext[t][ts][d][h] = Fnext[t][ts][d][h]/(1.0-predDeaths-damageDeaths); // normalise
-                maxfreqdiff = max(maxfreqdiff,abs(F[t][ts][d][h]-Fnext[t][ts][d][h])); // stores largest frequency difference so far
+                maxfreqdiff = std::max(maxfreqdiff,fabs(F[t][ts][d][h]-Fnext[t][ts][d][h])); // stores largest frequency difference so far
                 F[t][ts][d][h] = Fnext[t][ts][d][h]; // next time step becomes this time step
                 Fnext[t][ts][d][h] = 0.0; // wipe next time step
               } // end for h
@@ -407,7 +452,7 @@ void fwdCalc()
       }
       if (i%skip==0)
       {
-        cout << i << "\t" << maxfreqdiff << endl; // show fitness difference every 'skip' generations
+        std::cout << i << "\t" << maxfreqdiff << std::endl; // show fitness difference every 'skip' generations
       }
 
   }
@@ -423,17 +468,17 @@ void fwdCalc()
   outfile << "Kfec";
   outfile << std::fixed << Kfec;
   outfile << ".txt";
-  string fwdCalcfilename = outfile.str();
+  std::string fwdCalcfilename = outfile.str();
   fwdCalcfile.open(fwdCalcfilename.c_str());
   ///////////////////////////////////////////////////////
 
-  fwdCalcfile << "SUMMARY STATS" << endl
-    << "predDeaths: " << "\t" << predDeaths << endl
-    << "damageDeaths: " << "\t" << damageDeaths << endl
-    << endl;
+  fwdCalcfile << "SUMMARY STATS" << std::endl
+    << "predDeaths: " << "\t" << predDeaths << std::endl
+    << "damageDeaths: " << "\t" << damageDeaths << std::endl
+    << std::endl;
 
   fwdCalcfile << "\t" << "t" << "\t" << "ts" << "\t" << "damage" << "\t" << "hormone" << "\t" << //"repro" << "\t" <<
-    "freq" << endl; // column headings in output file
+    "freq" << std::endl; // column headings in output file
 
   for (t=1;t<maxT;++t)
   {
@@ -443,7 +488,7 @@ void fwdCalc()
         {
           for (h=0;h<maxH;++h)
           {
-            fwdCalcfile << "\t" << t << "\t" << ts << "\t" << d << "\t" << h << "\t" << setprecision(4) << F[t][ts][d][h] << "\t" << endl; // print data
+            fwdCalcfile << "\t" << t << "\t" << ts << "\t" << d << "\t" << h << "\t" << std::setprecision(4) << F[t][ts][d][h] << "\t" << std::endl; // print data
           }
         }
       }
@@ -473,11 +518,11 @@ void SimAttacks()
   outfile << "Kfec";
   outfile << std::fixed << Kfec;
   outfile << ".txt";
-  string attsimfilename = outfile.str();
+  std::string attsimfilename = outfile.str();
   attsimfile.open(attsimfilename.c_str());
   ///////////////////////////////////////////////////////
 
-  attsimfile << "time" << "\t" << "t" << "\t" << "ts" << "\t" << "damage" << "\t" << "hormone" << "\t" << "attack" << endl; // column headings in output file
+  attsimfile << "time" << "\t" << "t" << "\t" << "ts" << "\t" << "damage" << "\t" << "hormone" << "\t" << "attack" << std::endl; // column headings in output file
 
     // initialise individual (alive, no damage, no offspring, baseline hormone level) and starting environment (predator)
     //
@@ -519,7 +564,7 @@ void SimAttacks()
       ddec = dnew[d][h]-d1;
 
       if (Uniform(mt)<ddec) d = d2; else d = d1;
-      attsimfile << time << "\t" << t << "\t" << ts << "\t" << d << "\t" << h << "\t" << attack << "\t" << endl; // print data
+      attsimfile << time << "\t" << t << "\t" << ts << "\t" << d << "\t" << h << "\t" << attack << "\t" << std::endl; // print data
       ++ts;
     } // while (time <= time_sim_max)
 
@@ -566,13 +611,14 @@ int main()
 		outfile << "Kfec";
 		outfile << std::fixed << Kfec;
 		outfile << ".txt";
-		string outputfilename = outfile.str();
+        std::string outputfilename = outfile.str();
 		outputfile.open(outputfilename.c_str());
 		///////////////////////////////////////////////////////
 
-        outputfile << "Random seed: " << seed << endl; // write seed to output file
+        outputfile << "Random seed: " << seed << std::endl; // write seed to output file
 
         // initialize arrays
+        InitVectors();
         FinalFit();
         PredProb();
         Predation();
@@ -580,7 +626,7 @@ int main()
         Damage();
         Reproduction();
 
-        cout << "i" << "\t" << "totfitdiff" << endl;
+        std::cout << "i" << "\t" << "totfitdiff" << std::endl;
 
         for (i=1;i<=maxI;i++)
           {
@@ -588,16 +634,16 @@ int main()
           ReplaceFit();
 
           if (totfitdiff < 0.000001) break; // strategy has converged on optimal solution, so exit loop
-          if (i==maxI) { outputfile << "*** DID NOT CONVERGE WITHIN " << i << " ITERATIONS ***" << endl;}
+          if (i==maxI) { outputfile << "*** DID NOT CONVERGE WITHIN " << i << " ITERATIONS ***" << std::endl;}
 
  		  if (i%skip==0)
             {
-              cout << i << "\t" << totfitdiff << endl; // show fitness difference every 'skip' generations
+              std::cout << i << "\t" << totfitdiff << std::endl; // show fitness difference every 'skip' generations
             }
           }
 
-        cout << endl;
-        outputfile << endl;
+        std::cout << std::endl;
+        outputfile << std::endl;
 
         PrintStrat();
         PrintParams();
