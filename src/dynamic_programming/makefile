@@ -11,10 +11,10 @@ CXX=g++
 CXXFLAGS=-Wall -O3
 
 
-all : $(EXE) $(EXE_LH)
-
-$(EXE) : $(CPP)
-	$(CXX) $(CXXFLAGS) -o $(EXE) $(CPP)
+#all : $(EXE) $(EXE_LH)
+#
+#$(EXE) : $(CPP)
+#	$(CXX) $(CXXFLAGS) -o $(EXE) $(CPP)
 
 $(EXE_LH) : $(CPP_LH)
 	$(CXX) $(CXXFLAGS) -o $(EXE_LH) $(CPP_LH)
