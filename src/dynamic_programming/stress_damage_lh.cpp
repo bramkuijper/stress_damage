@@ -40,7 +40,7 @@ const int maxI        = 1000000; // maximum number of iterations
 const int maxT        = 100;     // maximum number of time steps since last saw predator
 const int maxH        = 500;     // maximum hormone level
 const int skip        = 10;      // interval between print-outs
-const int maxTs = 100; // duration of a season
+const int maxTs = 5; // duration of a season
 
 std::ofstream outputfile;  // output file
 std::ofstream fwdCalcfile; // forward calculation output file
@@ -59,8 +59,9 @@ double mu[maxD+1];                // probability of background mortality, as a f
 double dnew[maxD+1][maxH];        // new damage level, as a function of previous damage and hormone
 double repro[maxTs][maxD+1];       // reproductive output
 //double Wopt[maxT][maxTs][maxD+1];        // fitness immediately after predator has/hasn't attacked, under optimal decision h
-std::vector < std::vector < std::vector<double> > > Wopt;
 
+
+std::vector < std::vector < std::vector<double> > > Wopt;
 std::vector < std::vector < std::vector < std::vector <double> > > > W;
 std::vector < std::vector < std::vector < std::vector <double> > > > Wnext;
 std::vector < std::vector < std::vector < std::vector <double> > > > F;
@@ -117,16 +118,25 @@ void InitVectors()
       F.push_back(WF_superrow);
       Fnext.push_back(WF_superrow);
     }
+
+    std::cout << "well.." << std::endl;
+    std::cout << hormone[0][0][0][0] << std::endl;
+    std::cout << "and then .." << std::endl;
 }
 
 
 /* SPECIFY FINAL FITNESS */
 void FinalFit()
 {
-  int t,ts,d,h;
+  int t,d,h;
 
     for (t=1;t<maxT;++t) // note that Wnext is undefined for t=0 because t=1 if predator has just attacked
     {
+        // TODO
+        // set ts to 0 and use repro function
+        //
+        //
+        //
       for (ts=0;ts<maxTs;++ts)
       {
         for (d=0;d<=maxD;++d)
@@ -240,8 +250,8 @@ void OptDec()
 
               while (x1<x2)
               {
-                fitness_x1 = Wnext[std::min(maxT-1,t+1)][ts][d][x1]; // fitness as a function of h=x1
-                fitness_x2 = Wnext[std::min(maxT-1,t+1)][ts][d][x2]; // fitness as a function of h=x2
+                fitness_x1 = Wnext[std::min(maxT-1,t+1)][std::min(maxTs-1,ts+1)][d][x1]; // fitness as a function of h=x1
+                fitness_x2 = Wnext[std::min(maxT-1,t+1)][std::min(maxTs-1,ts+1)][d][x2]; // fitness as a function of h=x2
 
                 if (fitness_x1<fitness_x2)
                 {
