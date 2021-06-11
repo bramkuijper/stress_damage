@@ -12,7 +12,7 @@ CPP_TEST=test.cpp
 
 
 CXX=g++
-CXXFLAGS=-Wall -O3
+CXXFLAGS=-Wall -O3 -ggdb
 
 
 all : $(EXE_TEST) $(EXE) $(EXE_LH) 
