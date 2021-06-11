@@ -213,9 +213,8 @@ void OptDec()
 
               while (x1<x2)
               {
-                fitness_x1 = Wnext[std::min(maxT-1,t+1)][ts+1][d][x2];
-                fitness_x2 = Wnext[std::min(maxT-1,t+1)][std::min(maxTs-1,ts+1)][d][x2]; // fitness as a function of h=x2
-
+                fitness_x1 = Wnext[std::min(maxT-1,t+1)][(ts + 1) % maxTs][d][x2];
+                fitness_x2 = Wnext[std::min(maxT-1,t+1)][(ts + 1) % maxTs][d][x2]; // fitness as a function of h=x2
                 if (fitness_x1<fitness_x2)
                 {
                     LHS = x1;
@@ -240,7 +239,7 @@ void OptDec()
   // later on we will then set Wnext = W and see for which hormone level fitness is max
   for (t=1;t<maxT;++t) // note that W is undefined for t=0 because t=1 if predator has just attacked
   {
-      for (ts = 0; ts < maxTs; ++ts)
+      for (ts = maxTs-1; ts >= 0; --ts)
       {
         for (d=0;d<=maxD;++d)
         {
