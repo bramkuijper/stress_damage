@@ -40,7 +40,7 @@ const int maxI        = 1000000; // maximum number of iterations
 const int maxT        = 100;     // maximum number of time steps since last saw predator
 const int maxH        = 500;     // maximum hormone level
 const int skip        = 10;      // interval between print-outs
-const int maxTs = 100; // duration of a season
+const int maxTs = 5; // duration of a season
 
 std::ofstream outputfile;  // output file
 std::ofstream fwdCalcfile; // forward calculation output file
@@ -52,72 +52,40 @@ std::mt19937 mt(seed); // random number generator
 std::uniform_real_distribution<double> Uniform(0, 1); // real number between 0 and 1 (uniform)
 
 ///int hormone[maxT][maxTs][maxD+1];        // hormone level (strategy)
-std::vector < std::vector < std::vector<int> > > hormone; 
+std::vector < std::vector < std::vector<int> > > 
+    hormone(maxT, std::vector < std::vector <int> >(maxTs, std::vector<int>(maxD + 1, 0)));
 
 double pKilled[maxH];             // probability of being killed by an attacking predator
 double mu[maxD+1];                // probability of background mortality, as a function of damage
 double dnew[maxD+1][maxH];        // new damage level, as a function of previous damage and hormone
 double repro[maxTs][maxD+1];       // reproductive output
 //double Wopt[maxT][maxTs][maxD+1];        // fitness immediately after predator has/hasn't attacked, under optimal decision h
-std::vector < std::vector < std::vector<double> > > Wopt;
-
-std::vector < std::vector < std::vector < std::vector <double> > > > W;
-std::vector < std::vector < std::vector < std::vector <double> > > > Wnext;
-std::vector < std::vector < std::vector < std::vector <double> > > > F;
-std::vector < std::vector < std::vector < std::vector <double> > > > Fnext;
-
-
-
 //double W[maxT][maxTs][maxD+1][maxH];     // expected fitness at start of time step, before predator does/doesn't attack
 //double Wnext[maxT][maxTs][maxD+1][maxH]; // expected fitness at start of next time step
 //
 //double F[maxT][maxTs][maxD+1][maxH];     // frequency of individuals at start of time step, before predator does/doesn't attack
 //double Fnext[maxT][maxTs][maxD+1][maxH]; // frequency of individuals at start of next time step
+
+std::vector < std::vector < std::vector<double> > > 
+    Wopt(maxT, std::vector < std::vector <double> >(maxTs, std::vector<double>(maxD+1, 0.0)));
+
+std::vector < std::vector < std::vector < std::vector <double> > > > 
+    W(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
+
+std::vector < std::vector < std::vector < std::vector <double> > > > 
+    Wnext(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
+
+std::vector < std::vector < std::vector < std::vector <double> > > > 
+    F(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
+
+std::vector < std::vector < std::vector < std::vector <double> > > > 
+    Fnext(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
+
+
 double pPred[maxT];               // probability that predator is present
 double totfitdiff;                // fitness difference between optimal strategy in successive iterations
 
 int i;     // iteration
-
-
-void InitVectors()
-{
-    int t, ts, d;
-    for (t=1;t<maxT;++t) // note that Wnext is undefined for t=0 because t=1 if predator has just attacked
-    {
-      std::vector < std::vector <int> > hormone_row;
-      std::vector < std::vector <double> > Wopt_row;
-      
-      std::vector < std::vector < std::vector <double> > > WF_superrow;
-
-      for (ts=0;ts<maxTs;++ts)
-      {
-          // intialize for all levels of damage
-        std::vector<int> hormone_col(0,maxD+1);
-        hormone_row.push_back(hormone_col);
-        
-        std::vector<double> Wopt_col(0.0,maxD+1);
-        Wopt_row.push_back(Wopt_col);
-
-        std::vector< std::vector < double > > WF_row;
-
-        for (d = 0; d<= maxD; ++d)
-        {
-            std::vector <double> WF_col(0.0,maxH);
-
-            WF_row.push_back(WF_col);
-        }
-
-        WF_superrow.push_back(WF_row);
-      }
-
-      hormone.push_back(hormone_row);
-      Wopt.push_back(Wopt_row);
-      W.push_back(WF_superrow);
-      Wnext.push_back(WF_superrow);
-      F.push_back(WF_superrow);
-      Fnext.push_back(WF_superrow);
-    }
-}
 
 
 /* SPECIFY FINAL FITNESS */
@@ -127,6 +95,11 @@ void FinalFit()
 
     for (t=1;t<maxT;++t) // note that Wnext is undefined for t=0 because t=1 if predator has just attacked
     {
+        // TODO
+        // set ts to 0 and use repro function
+        //
+        //
+        //
       for (ts=0;ts<maxTs;++ts)
       {
         for (d=0;d<=maxD;++d)
@@ -227,7 +200,7 @@ void OptDec()
   // where h in t, ts, and d is unimodal
     for (t=0;t<maxT;++t)
     {
-        for (ts=0;ts<maxTs; ++t)
+        for (ts=0;ts<maxTs; ++ts)
         {
             for (d=0;d<=maxD;++d)
             {
@@ -240,8 +213,8 @@ void OptDec()
 
               while (x1<x2)
               {
-                fitness_x1 = Wnext[std::min(maxT-1,t+1)][ts][d][x1]; // fitness as a function of h=x1
-                fitness_x2 = Wnext[std::min(maxT-1,t+1)][ts][d][x2]; // fitness as a function of h=x2
+                fitness_x1 = Wnext[std::min(maxT-1,t+1)][ts+1 % Tsmax][d][x2];
+                fitness_x2 = Wnext[std::min(maxT-1,t+1)][std::min(maxTs-1,ts+1)][d][x2]; // fitness as a function of h=x2
 
                 if (fitness_x1<fitness_x2)
                 {
@@ -277,9 +250,9 @@ void OptDec()
                 d2=ceil(dnew[d][h]); // for linear interpolation
                 ddec=dnew[d][h]-double(d1); // for linear interpolation
 
-                W[t][ts][d][h] = pPred[t]*pAttack*(1.0-pKilled[h])*(1.0-mu[d])*(repro[d][ts] + 
+                W[t][ts][d][h] = pPred[t]*pAttack*(1.0-pKilled[h])*(1.0-mu[d])*(repro[ts][d] + 
                         (1.0-ddec)*Wopt[0][ts][d1]+ddec*Wopt[0][ts][d2]) // survive attack
-                            + (1.0-pPred[t]*pAttack)*(1.0-mu[d])*(repro[d][ts] +
+                            + (1.0-pPred[t]*pAttack)*(1.0-mu[d])*(repro[ts][d] +
                                     (1.0-ddec)*Wopt[t][ts][d1]+ddec*Wopt[t][ts][d2]); // no attack
             } // end for h
         } // end for d
@@ -617,8 +590,6 @@ int main()
 
         outputfile << "Random seed: " << seed << std::endl; // write seed to output file
 
-        // initialize arrays
-        InitVectors();
         FinalFit();
         PredProb();
         Predation();
@@ -628,7 +599,7 @@ int main()
 
         std::cout << "i" << "\t" << "totfitdiff" << std::endl;
 
-        for (i=1;i<=maxI;i++)
+        for (i=1;i<=maxI;++i)
           {
           OptDec();
           ReplaceFit();
