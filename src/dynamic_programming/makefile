@@ -8,7 +8,7 @@ EXE_LH=stress_damage_lh.exe
 CPP_LH=stress_damage_lh.cpp
 
 CXX=g++
-CXXFLAGS=-Wall -O3
+CXXFLAGS=-Wall -O3 -ggdb
 
 all : $(EXE) $(EXE_LH) 
 
