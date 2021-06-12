@@ -36,11 +36,11 @@ const double phi_inv  = 1.0/((sqrt(5.0)+1.0)/2.0); // inverse of golden ratio (f
 const int maxD        = 20;      // maximum damage level
 const double Kmort        = 0.01;    // parameter Kmort controlling increase in mortality with damage level
 const double Kfec        = 0.0;    // parameter Kmort controlling increase in mortality with damage level
-const int maxI        = 1000000; // maximum number of iterations
+const int maxI        = 1; // maximum number of iterations
 const int maxT        = 100;     // maximum number of time steps since last saw predator
 const int maxH        = 500;     // maximum hormone level
 const int skip        = 10;      // interval between print-outs
-const int maxTs = 5; // duration of a season
+const int maxTs = 100; // duration of a season
 
 std::ofstream outputfile;  // output file
 std::ofstream fwdCalcfile; // forward calculation output file
@@ -95,18 +95,13 @@ void FinalFit()
 
     for (t=1;t<maxT;++t) // note that Wnext is undefined for t=0 because t=1 if predator has just attacked
     {
-        // TODO
-        // set ts to 0 and use repro function
-        //
-        //
-        //
       for (ts=0;ts<maxTs;++ts)
       {
         for (d=0;d<=maxD;++d)
         {
           for (h=0;h<maxH;++h)
           {
-            Wnext[t][ts][d][h] = 1.0;
+            Wnext[t][ts][d][h] = repro[ts][d];
           }
         }
       }
@@ -215,6 +210,7 @@ void OptDec()
               {
                 fitness_x1 = Wnext[std::min(maxT-1,t+1)][(ts + 1) % maxTs][d][x2];
                 fitness_x2 = Wnext[std::min(maxT-1,t+1)][(ts + 1) % maxTs][d][x2]; // fitness as a function of h=x2
+
                 if (fitness_x1<fitness_x2)
                 {
                     LHS = x1;
@@ -249,9 +245,9 @@ void OptDec()
                 d2=ceil(dnew[d][h]); // for linear interpolation
                 ddec=dnew[d][h]-double(d1); // for linear interpolation
 
-                W[t][ts][d][h] = pPred[t]*pAttack*(1.0-pKilled[h])*(1.0-mu[d])*(repro[d][ts] + 
+                W[t][ts][d][h] = pPred[t]*pAttack*(1.0-pKilled[h])*(1.0-mu[d])*(repro[ts][d] + 
                         (1.0-ddec)*Wopt[0][ts][d1]+ddec*Wopt[0][ts][d2]) // survive attack
-                            + (1.0-pPred[t]*pAttack)*(1.0-mu[d])*(repro[d][ts] +
+                            + (1.0-pPred[t]*pAttack)*(1.0-mu[d])*(repro[ts][d] +
                                     (1.0-ddec)*Wopt[t][ts][d1]+ddec*Wopt[t][ts][d2]); // no attack
             } // end for h
         } // end for d
@@ -415,7 +411,7 @@ void fwdCalc()
               for (h=0;h<maxH;h++)
               {
                 Fnext[t][ts][d][h] = Fnext[t][ts][d][h]/(1.0-predDeaths-damageDeaths); // normalise
-                maxfreqdiff = std::max(maxfreqdiff,abs(F[t][ts][d][h]-Fnext[t][ts][d][h])); // stores largest frequency difference so far
+                maxfreqdiff = std::max(maxfreqdiff,fabs(F[t][ts][d][h]-Fnext[t][ts][d][h])); // stores largest frequency difference so far
                 F[t][ts][d][h] = Fnext[t][ts][d][h]; // next time step becomes this time step
                 Fnext[t][ts][d][h] = 0.0; // wipe next time step
               } // end for h
@@ -426,7 +422,6 @@ void fwdCalc()
       {
         std::cout << i << "\t" << maxfreqdiff << std::endl; // show fitness difference every 'skip' generations
       }
-
   }
 
   ///////////////////////////////////////////////////////
@@ -589,12 +584,12 @@ int main()
 
         outputfile << "Random seed: " << seed << std::endl; // write seed to output file
 
+        Reproduction();
         FinalFit();
         PredProb();
         Predation();
         Mortality();
         Damage();
-        Reproduction();
 
         std::cout << "i" << "\t" << "totfitdiff" << std::endl;
 
