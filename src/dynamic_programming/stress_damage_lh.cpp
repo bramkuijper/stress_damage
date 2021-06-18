@@ -95,14 +95,11 @@ void FinalFit()
 
     for (t=1;t<maxT;++t) // note that Wnext is undefined for t=0 because t=1 if predator has just attacked
     {
-        for (ts = 0; ts < maxTs; ++ts)
+        for (d=0;d<=maxD;++d)
         {
-            for (d=0;d<=maxD;++d)
+            for (h=0;h<maxH;++h)
             {
-                for (h=0;h<maxH;++h)
-                {
-                    Wnext[t][ts][d][h] = repro[maxTs - 1][d];
-                }
+                Wnext[t][maxTs - 1][d][h] = repro[maxTs - 1][d];
             }
         }
     }
