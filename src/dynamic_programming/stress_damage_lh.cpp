@@ -36,7 +36,7 @@ const double phi_inv  = 1.0/((sqrt(5.0)+1.0)/2.0); // inverse of golden ratio (f
 const int maxD        = 20;      // maximum damage level
 const double Kmort        = 0.01;    // parameter Kmort controlling increase in mortality with damage level
 const double Kfec        = 0.0;    // parameter Kmort controlling increase in mortality with damage level
-const int maxI        = 1; // maximum number of iterations
+const int maxI        = 1000000; // maximum number of iterations
 const int maxT        = 100;     // maximum number of time steps since last saw predator
 const int maxH        = 500;     // maximum hormone level
 const int skip        = 10;      // interval between print-outs
@@ -102,6 +102,7 @@ void FinalFit()
           for (h=0;h<maxH;++h)
           {
             Wnext[t][ts][d][h] = repro[ts][d];
+
           }
         }
       }
@@ -274,7 +275,7 @@ void ReplaceFit()
             {
               for (h=0;h<maxH;++h)
               {
-                fitdiff = fitdiff + abs(Wnext[t][ts][d][h]-W[t][ts][d][h]);
+                fitdiff = fitdiff + fabs(Wnext[t][ts][d][h]-W[t][ts][d][h]);
                 Wnext[t][ts][d][h] = W[t][ts][d][h];
               }
             }
@@ -422,7 +423,7 @@ void fwdCalc()
       {
         std::cout << i << "\t" << maxfreqdiff << std::endl; // show fitness difference every 'skip' generations
       }
-  }
+  } // end while 
 
   ///////////////////////////////////////////////////////
   outfile.str("");
@@ -525,7 +526,9 @@ void SimAttacks()
         t++;
         attack = false;
       }
-      h = hormone[t][ts][d];
+
+      h = hormone[t][ts % maxTs][d];
+
       d1 = floor(dnew[d][h]);
       d2 = ceil(dnew[d][h]);
       ddec = dnew[d][h]-d1;
@@ -591,20 +594,22 @@ int main()
         Mortality();
         Damage();
 
-        std::cout << "i" << "\t" << "totfitdiff" << std::endl;
+        std::cout << "i" << "\t" << "totfitdiff" << "\t" << std::endl;
 
         for (i=1;i<=maxI;++i)
           {
           OptDec();
           ReplaceFit();
 
-          if (totfitdiff < 0.000001) break; // strategy has converged on optimal solution, so exit loop
-          if (i==maxI) { outputfile << "*** DID NOT CONVERGE WITHIN " << i << " ITERATIONS ***" << std::endl;}
 
- 		  if (i%skip==0)
+ 		  if (i%skip==0 || totfitdiff < 0.000001)
             {
               std::cout << i << "\t" << totfitdiff << std::endl; // show fitness difference every 'skip' generations
             }
+          
+          if (totfitdiff < 0.000001) break; // strategy has converged on optimal solution, so exit loop
+
+          if (i==maxI) { outputfile << "*** DID NOT CONVERGE WITHIN " << i << " ITERATIONS ***" << std::endl;}
           }
 
         std::cout << std::endl;
@@ -614,7 +619,7 @@ int main()
         PrintParams();
         outputfile.close();
 
-        fwdCalc();
+//        fwdCalc();
         SimAttacks();
 
         }

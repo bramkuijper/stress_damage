@@ -17,37 +17,38 @@ mpl.use("pgf")
 
 #### fonts etc
 
-fontpath = "/System/Library/Fonts/Supplemental/" 
+#fontpath = "/System/Library/Fonts/Supplemental/" 
+#fontpath = "/System/Library/Fonts/Supplemental/" 
+#
+#pgf_with_custom_preamble = {
+#    "font.family": "serif", # use serif/main font for text elements
+#    "text.usetex": True,    # use inline math for ticks
+#    "pgf.rcfonts": False,   # don't setup fonts from rc parameters
+#    "pgf.preamble": "\n".join([
+#        r"\usepackage{units}",         # load additional packages
+#        r"\usepackage{mathspec}",         # load additional packages
+#        r"\setmainfont[" +\
+#            "Path = " + fontpath + "," +\
+#            "UprightFont = * ," +\
+#            "ItalicFont = *Italic ," +\
+#            "BoldFont = *Bol," +\
+#            "Extension = .otf]{STIXGeneral}",
+#        r"\setmathsfont(Digits,Latin,Greek)[" +\
+#            "Path = " + fontpath + "," +\
+#            "UprightFont = * ," +\
+#            "ItalicFont = *Italic ," +\
+#            "BoldFont = *Bol," +\
+#            "Extension = .otf]{STIXGeneral}",
+#        r"\setmathrm[" +\
+#            "Path = " + fontpath + "," +\
+#            "UprightFont = * ," +\
+#            "ItalicFont = *Italic ," +\
+#            "BoldFont = *Bol," +\
+#            "Extension = .otf]{STIXGeneral}",
+#         ])
+#}
 
-pgf_with_custom_preamble = {
-    "font.family": "serif", # use serif/main font for text elements
-    "text.usetex": True,    # use inline math for ticks
-    "pgf.rcfonts": False,   # don't setup fonts from rc parameters
-    "pgf.preamble": "\n".join([
-        r"\usepackage{units}",         # load additional packages
-        r"\usepackage{mathspec}",         # load additional packages
-        r"\setmainfont[" +\
-            "Path = " + fontpath + "," +\
-            "UprightFont = * ," +\
-            "ItalicFont = *Italic ," +\
-            "BoldFont = *Bol," +\
-            "Extension = .otf]{STIXGeneral}",
-        r"\setmathsfont(Digits,Latin,Greek)[" +\
-            "Path = " + fontpath + "," +\
-            "UprightFont = * ," +\
-            "ItalicFont = *Italic ," +\
-            "BoldFont = *Bol," +\
-            "Extension = .otf]{STIXGeneral}",
-        r"\setmathrm[" +\
-            "Path = " + fontpath + "," +\
-            "UprightFont = * ," +\
-            "ItalicFont = *Italic ," +\
-            "BoldFont = *Bol," +\
-            "Extension = .otf]{STIXGeneral}",
-         ])
-}
-
-mpl.rcParams.update(pgf_with_custom_preamble)
+#mpl.rcParams.update(pgf_with_custom_preamble)
 
 def process_params(line_array):
 
@@ -228,7 +229,7 @@ if seasonal:
 
         the_fig.end_block(ax=the_axis
                 ,ylabel="Ts"
-                ,xticks=damage_val_select.index(d_i) == len(damage_val)
+                ,xticks=damage_val_select.index(d_i) == len(damage_vals)
                 ,yticks=True
                 ,xlabel="Time"
                 ,title=r"Damage = " + str(d_i))
