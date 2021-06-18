@@ -232,7 +232,7 @@ void OptDec()
                 }
               }
               // ts ranges here from MaxTs - 2 to 0
-              // i.e., there are no hormone values here for MaxTs - 1
+              // i.e., there are no hormone, Wopt values here for MaxTs - 1
               hormone[t][ts][d] = x1; // optimal hormone level
               Wopt[t][ts][d] = fitness_x1; // fitness of optimal decision
             } // end for d
