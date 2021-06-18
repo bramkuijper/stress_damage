@@ -11,6 +11,7 @@ from matplotlib import cm
 import matplotlib.lines as lines
 import matplotlib.patches as mpatches
 import matplotlib as mpl
+import numpy as np
 mpl.use("pgf")
 
 
@@ -115,7 +116,7 @@ def generate_pivot(the_data,x, y, z):
 
 
 
-#### get the stress_data
+#### get the stress_data file name
 file_name = sys.argv[1]
 
 # do some checking
@@ -137,6 +138,10 @@ if "maxTs" in pardict.keys():
 
     tsval = [ 0, round(maxTs/4), round(maxTs/2), round(maxTs * 0.75), round(maxTs) ]
 
+
+
+
+##### read in the data #####
 skiprows=2
 
 stress_data = pd.read_csv(filepath_or_buffer=file_name
@@ -152,11 +157,10 @@ damage_filter = [0,0.25, 0.5,0.75,1]
 
 damage_val_select = []
 for damage_filter_i in damage_filter:
-    damage_val_select += [damage_vals[damage_filter_i*(len(damage_vals) - 1)]]
-
+    damage_val_select += [damage_vals[round(damage_filter_i*(len(damage_vals) - 1))]]
 print(damage_val_select)
 
-
+# read in the simulated attack data
 file_name_sim_attack = re.sub(
         pattern="stressL"
         ,repl="simAttacksL"
@@ -191,12 +195,11 @@ the_fig = multipanel.MultiPanel(
         ,filename="plot_" + file_root + ".pdf"
         ,hspace=0.3
         ,width=8
-        ,height=5
+        ,height=15
         )
 
 rowctr = 0
 
-# TODO
 if seasonal:
 
     for d_i in damage_val_select:
@@ -207,6 +210,8 @@ if seasonal:
 
         stress_subset = stress_data[stress_data["d"] == d_i].copy(deep=True)
 
+        # make pivot table to fit 
+        # the imshow or contourplot
         (x, y, z) = generate_pivot(stress_subset
                 ,x="t"
                 ,y="ts"
@@ -219,11 +224,11 @@ if seasonal:
                                 y.max()],
                     origin="lower",
                     aspect="auto",
-                    cmap=plt.get_cmap("Blues"))
+                    cmap=cm.get_cmap(name="Blues"))
 
         the_fig.end_block(ax=the_axis
                 ,ylabel="Ts"
-                ,xticks=True
+                ,xticks=damage_val_select.index(d_i) == len(damage_val)
                 ,yticks=True
                 ,xlabel="Time"
                 ,title=r"Damage = " + str(d_i))
@@ -237,7 +242,6 @@ else:
 
     for d_i in damage_val_select:
         
-
         d_sub = stress_data[stress_data["d"] == d_i]
 
         the_axis.plot(d_sub["t"]
@@ -255,10 +259,14 @@ else:
 
     rowctr += 1
 
+
+
 ## plot simulated attacks:hormone
 the_axis = the_fig.start_block(
         row=rowctr
         ,col=0)
+
+rowctr += 1
 
 # plot hormone levels
 the_axis.plot(sim_attack_data["time"]
@@ -287,8 +295,10 @@ the_fig.end_block(ax=the_axis
 
 ## plot simulated attacks: damage
 the_axis = the_fig.start_block(
-        row=2
+        row=rowctr
         ,col=0)
+
+rowctr += 1
 
 the_axis.plot(sim_attack_data["time"]
         ,sim_attack_data["damage"]
