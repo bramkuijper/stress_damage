@@ -95,17 +95,16 @@ void FinalFit()
 
     for (t=1;t<maxT;++t) // note that Wnext is undefined for t=0 because t=1 if predator has just attacked
     {
-      for (ts=0;ts<maxTs;++ts)
-      {
-        for (d=0;d<=maxD;++d)
+        for (ts = 0; ts < maxTs; ++ts)
         {
-          for (h=0;h<maxH;++h)
-          {
-            Wnext[t][ts][d][h] = repro[ts][d];
-
-          }
+            for (d=0;d<=maxD;++d)
+            {
+                for (h=0;h<maxH;++h)
+                {
+                    Wnext[t][ts][d][h] = repro[maxTs - 1][d];
+                }
+            }
         }
-      }
     }
 } // end FinalFit()
 
@@ -178,7 +177,7 @@ void Reproduction()
   { 
     for (d=0;d<=maxD;++d)
     {
-        repro[ts][d] = ts == 0 ? std::max(0.0, 1.0 - Kfec*double(d)) : 0.0;
+        repro[ts][d] = ts == maxTs - 1 ? std::max(0.0, 1.0 - Kfec*double(d)) : 0.0;
     }
   }
 } // end Reproduction()
@@ -192,11 +191,14 @@ void OptDec()
     LHS,RHS,x1,x2,cal_x1,cal_x2;
   double fitness,fitness_x1,fitness_x2,ddec;
 
-  // calculate optimal decision h given current t, ts and d (N.B. t=0 if survived attack)
-  // where h in t, ts, and d is unimodal
-    for (t=0;t<maxT;++t)
+        // TODO: go from maxTs down to 0
+        // you do one complete breeding seasons so no modulo operators
+        // start from maxTs - 2
+    for (ts = maxTs - 2; ts >= 0; --ts)
     {
-        for (ts=0;ts<maxTs; ++ts)
+      // calculate optimal decision h given current t, ts and d (N.B. t=0 if survived attack)
+      // where h in t, ts, and d is unimodal
+        for (t=0;t<maxT;++t)
         {
             for (d=0;d<=maxD;++d)
             {
@@ -209,8 +211,12 @@ void OptDec()
 
               while (x1<x2)
               {
-                fitness_x1 = Wnext[std::min(maxT-1,t+1)][(ts + 1) % maxTs][d][x2];
-                fitness_x2 = Wnext[std::min(maxT-1,t+1)][(ts + 1) % maxTs][d][x2]; // fitness as a function of h=x2
+                  // range of values of ts +1: 
+                  //    maxTs - 2 + 1 = maxTs - 1 (i.e., end of array)
+                  //    0 + 1 = 1 (i.e., one off start of array
+                  //    Wnext[ts = 0] will not be accessed
+                fitness_x1 = Wnext[std::min(maxT-1,t+1)][ts + 1][d][x2];
+                fitness_x2 = Wnext[std::min(maxT-1,t+1)][ts + 1][d][x2]; // fitness as a function of h=x2
 
                 if (fitness_x1<fitness_x2)
                 {
@@ -225,37 +231,38 @@ void OptDec()
                     x1 = LHS + (round((double(x2)-double(LHS))*phi_inv));
                 }
               }
+              // range from MaxTs - 1 to 0
               hormone[t][ts][d] = x1; // optimal hormone level
               Wopt[t][ts][d] = fitness_x1; // fitness of optimal decision
 
             } // end for d
-        } // end for ts
-    } // end for t
+        } // end for t
+    } // end for ts
 
   // calculate expected fitness W as a function of t, h and d, before predator does/doesn't attack
   // later on we will then set Wnext = W and see for which hormone level fitness is max
-  for (t=1;t<maxT;++t) // note that W is undefined for t=0 because t=1 if predator has just attacked
-  {
-      for (ts = maxTs-1; ts >= 0; --ts)
-      {
-        for (d=0;d<=maxD;++d)
+
+    for (ts = maxTs-1; ts >= 0; --ts)
+    {
+        for (t=1;t<maxT;++t) // note that W is undefined for t=0 because t=1 if predator has just attacked
         {
-            for (h=0;h<maxH;++h)
+            for (d=0;d<=maxD;++d)
             {
-                d1=floor(dnew[d][h]); // for linear interpolation
-                d2=ceil(dnew[d][h]); // for linear interpolation
-                ddec=dnew[d][h]-double(d1); // for linear interpolation
+                for (h=0;h<maxH;++h)
+                {
+                    d1=floor(dnew[d][h]); // for linear interpolation
+                    d2=ceil(dnew[d][h]); // for linear interpolation
+                    ddec=dnew[d][h]-double(d1); // for linear interpolation
 
-                W[t][ts][d][h] = pPred[t]*pAttack*(1.0-pKilled[h])*(1.0-mu[d])*(repro[ts][d] + 
-                        (1.0-ddec)*Wopt[0][ts][d1]+ddec*Wopt[0][ts][d2]) // survive attack
-                            + (1.0-pPred[t]*pAttack)*(1.0-mu[d])*(repro[ts][d] +
-                                    (1.0-ddec)*Wopt[t][ts][d1]+ddec*Wopt[t][ts][d2]); // no attack
-            } // end for h
-        } // end for d
-      } // end for ts
-  } // end for t
-
-}
+                    W[t][ts][d][h] = pPred[t]*pAttack*(1.0-pKilled[h])*(1.0-mu[d])*(repro[ts][d] + 
+                            (1.0-ddec)*Wopt[0][ts][d1]+ddec*Wopt[0][ts][d2]) // survive attack
+                                + (1.0-pPred[t]*pAttack)*(1.0-mu[d])*(repro[ts][d] +
+                                        (1.0-ddec)*Wopt[t][ts][d1]+ddec*Wopt[t][ts][d2]); // no attack
+                } // end for h
+            } // end for d
+        } // end for t
+    } // end for ts
+} // end void OptDec()
 
 
 
