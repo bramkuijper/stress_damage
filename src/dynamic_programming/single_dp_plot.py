@@ -102,6 +102,18 @@ def rm_trailing_tabs(file_name):
     with open(file=file_name, mode="w") as the_file:
         the_file.write(fl)
 
+############ pivot tables of the histograms ############
+
+def generate_pivot(the_data,x, y, z):
+    the_pivot = the_data.pivot_table(values=z, index=y, columns=x)
+
+    x, y = np.meshgrid(the_pivot.columns.values, the_pivot.index.values)
+
+    z = the_pivot.values
+
+    return(x, y, z)
+
+
 
 #### get the stress_data
 file_name = sys.argv[1]
@@ -116,12 +128,34 @@ end_line, pardict = find_footer(file_name)
 maxH = pardict["maxH"]
 maxD = pardict["maxD"]
 
+seasonal = False
+
+if "maxTs" in pardict.keys():
+    maxTs = pardict["maxTs"]
+
+    seasonal = True
+
+    tsval = [ 0, round(maxTs/4), round(maxTs/2), round(maxTs * 0.75), round(maxTs) ]
+
 skiprows=2
 
 stress_data = pd.read_csv(filepath_or_buffer=file_name
         ,sep="\t"
         ,skiprows=skiprows
         ,nrows=end_line-skiprows)
+
+# get all the damage values
+damage_vals = list(stress_data["d"].unique())
+damage_vals.sort()
+
+damage_filter = [0,0.25, 0.5,0.75,1]
+
+damage_val_select = []
+for damage_filter_i in damage_filter:
+    damage_val_select += [damage_vals[damage_filter_i*(len(damage_vals) - 1)]]
+
+print(damage_val_select)
+
 
 file_name_sim_attack = re.sub(
         pattern="stressL"
@@ -140,47 +174,90 @@ path, file_name_last = os.path.split(file_name)
 
 file_root, file_ext = os.path.splitext(file_name_last)
 
+# at least 2 rows
+# for the simulation
+nrows = 2
+
+# if this is a simulation with seasonality
+# we will plot as many imshow plots()
+# as there are selected levels of damage 
+# otherwise we just produce a single line plot
+nrows += len(damage_val_select) if seasonal else 1
+
+
 the_fig = multipanel.MultiPanel(
         panel_widths=[1]
-        ,panel_heights=[1,1,1,1]
+        ,panel_heights=[1 for x in range(0,nrows)]
         ,filename="plot_" + file_root + ".pdf"
         ,hspace=0.3
         ,width=8
         ,height=5
         )
-    
-the_axis = the_fig.start_block(
-        row=0
-        ,col=0)
 
-the_axis.plot(stress_data["t"]
-        ,stress_data["d"])
+rowctr = 0
 
-the_fig.end_block(ax=the_axis
-        ,ylabel="Damage"
-        ,ylim=[0,maxD])
+# TODO
+if seasonal:
 
-## plot hormone over time
-the_axis = the_fig.start_block(
-        row=1
-        ,col=0)
+    for d_i in damage_val_select:
 
+        the_axis = the_fig.start_block(
+                row=rowctr
+                ,col=0)
 
-the_axis.plot(stress_data["t"]
-        ,stress_data["hormone"])
+        stress_subset = stress_data[stress_data["d"] == d_i].copy(deep=True)
 
-the_fig.end_block(ax=the_axis
-        ,ylabel="Hormone"
-        ,ylim=[0,maxH]
-        ,xticks=True
-        ,xlabel="Time")
+        (x, y, z) = generate_pivot(stress_subset
+                ,x="t"
+                ,y="ts"
+                ,z="hormone")
 
+        the_axis.imshow(z,
+                    extent=[x.min(),
+                                x.max(),
+                                y.min(),
+                                y.max()],
+                    origin="lower",
+                    aspect="auto",
+                    cmap=plt.get_cmap("Blues"))
 
+        the_fig.end_block(ax=the_axis
+                ,ylabel="Ts"
+                ,xticks=True
+                ,yticks=True
+                ,xlabel="Time"
+                ,title=r"Damage = " + str(d_i))
 
+        rowctr += 1
+
+else:
+    the_axis = the_fig.start_block(
+            row=rowctr
+            ,col=0)
+
+    for d_i in damage_val_select:
+        
+
+        d_sub = stress_data[stress_data["d"] == d_i]
+
+        the_axis.plot(d_sub["t"]
+                ,d_sub["hormone"]
+                ,label=r"$d = " + str(d_i) + "$"
+                )
+
+    the_axis.legend()
+
+    the_fig.end_block(ax=the_axis
+            ,ylabel="Hormone"
+            ,xticks=True
+            ,yticks=True
+            ,xlabel="Time")
+
+    rowctr += 1
 
 ## plot simulated attacks:hormone
 the_axis = the_fig.start_block(
-        row=2
+        row=rowctr
         ,col=0)
 
 # plot hormone levels
@@ -205,11 +282,12 @@ if nrow_attack > 0:
 
 the_fig.end_block(ax=the_axis
         ,ylabel="Hormone"
+        ,yticks=True
         ,ylim=[0,maxH])
 
 ## plot simulated attacks: damage
 the_axis = the_fig.start_block(
-        row=3
+        row=2
         ,col=0)
 
 the_axis.plot(sim_attack_data["time"]
@@ -230,6 +308,7 @@ the_fig.end_block(ax=the_axis
         ,ylabel="Damage"
         ,xticks=True
         ,xlabel="Time"
+        ,yticks=True
         ,ylim=[0,maxD])
 
 
