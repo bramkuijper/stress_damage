@@ -91,7 +91,7 @@ int i;     // iteration
 /* SPECIFY FINAL FITNESS */
 void FinalFit()
 {
-  int t,ts,d,h;
+  int t,d,h;
 
     for (t=1;t<maxT;++t) // note that Wnext is undefined for t=0 because t=1 if predator has just attacked
     {
@@ -161,8 +161,7 @@ void Damage()
       dnew[d][h] = std::max(0.0,std::min(double(maxD),double(d) + 4.0*(double(h)/double(maxH))*(double(h)/double(maxH))-1.0));
     }
   }
-}
-
+} // void Damage()
 
 
 /* CALCULATE PROBABILITY OF REPRODUCING */
@@ -234,13 +233,10 @@ void OptDec()
               Wopt[t][ts][d] = fitness_x1; // fitness of optimal decision
             } // end for d
         } // end for t
-    } // end for ts
 
   // calculate expected fitness W as a function of t, h and d, before predator does/doesn't attack
   // later on we will then set Wnext = W and see for which hormone level fitness is max
 
-    for (ts = maxTs-1; ts >= 0; --ts)
-    {
         for (t=1;t<maxT;++t) // note that W is undefined for t=0 because t=1 if predator has just attacked
         {
             for (d=0;d<=maxD;++d)
