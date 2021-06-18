@@ -191,9 +191,9 @@ void OptDec()
     LHS,RHS,x1,x2,cal_x1,cal_x2;
   double fitness,fitness_x1,fitness_x2,ddec;
 
-        // TODO: go from maxTs down to 0
-        // you do one complete breeding seasons so no modulo operators
-        // start from maxTs - 2
+    // go from maxTs down to 0
+    // start from maxTs - 2, as we need to reach back
+    // to array positions given by ts + 1
     for (ts = maxTs - 2; ts >= 0; --ts)
     {
       // calculate optimal decision h given current t, ts and d (N.B. t=0 if survived attack)
@@ -231,10 +231,10 @@ void OptDec()
                     x1 = LHS + (round((double(x2)-double(LHS))*phi_inv));
                 }
               }
-              // range from MaxTs - 1 to 0
+              // ts ranges here from MaxTs - 2 to 0
+              // i.e., there are no hormone values here for MaxTs - 1
               hormone[t][ts][d] = x1; // optimal hormone level
               Wopt[t][ts][d] = fitness_x1; // fitness of optimal decision
-
             } // end for d
         } // end for t
     } // end for ts
