@@ -66,23 +66,33 @@ double repro[maxTs][maxD+1];       // reproductive output
 //double F[maxT][maxTs][maxD+1][maxH];     // frequency of individuals at start of time step, before predator does/doesn't attack
 //double Fnext[maxT][maxTs][maxD+1][maxH]; // frequency of individuals at start of next time step
 
+// Wopt
 std::vector < std::vector < std::vector<double> > > 
     Wopt(maxT, std::vector < std::vector <double> >(maxTs, std::vector<double>(maxD+1, 0.0)));
 
+// W
 std::vector < std::vector < std::vector < std::vector <double> > > > 
     W(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
 
+// reproductive value V    
+std::vector < std::vector < std::vector<double> > > 
+    V(maxT, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0)));
+
+// Wnext
 std::vector < std::vector < std::vector < std::vector <double> > > > 
     Wnext(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
 
+// F
 std::vector < std::vector < std::vector < std::vector <double> > > > 
     F(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
 
+// Fnext
 std::vector < std::vector < std::vector < std::vector <double> > > > 
     Fnext(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
 
 
-double pPred[maxT];               // probability that predator is present
+    
+    double pPred[maxT];               // probability that predator is present
 double totfitdiff;                // fitness difference between optimal strategy in successive iterations
 
 int i;     // iteration
@@ -99,7 +109,7 @@ void FinalFit()
         {
             for (h=0;h<maxH;++h)
             {
-                Wnext[t][maxTs - 1][d][h] = repro[maxTs - 1][d];
+               V[t][d][h] =  Wnext[t][maxTs - 1][d][h] = repro[maxTs - 1][d];
             }
         }
     }
@@ -267,19 +277,22 @@ void ReplaceFit()
 
   fitdiff = 0.0;
 
+  // loop through t, d, h
+  // the values of maxTs - 1 are going to be set to ts = 0
+
   for (t=1;t<maxT;t++)
   {
-      for (ts = 0; ts < maxTs; ++ts)
-      {
-            for (d=0;d<=maxD;++d)
-            {
-              for (h=0;h<maxH;++h)
-              {
-                fitdiff = fitdiff + fabs(Wnext[t][ts][d][h]-W[t][ts][d][h]);
-                Wnext[t][ts][d][h] = W[t][ts][d][h];
-              }
-            }
-      }
+        for (d=0;d<=maxD;++d)
+        {
+          for (h=0;h<maxH;++h)
+          {
+            fitdiff = fitdiff + fabs(V[t][d][h]-W[t][0][d][h]);
+
+            Wnext[t][maxTs - 1][d][h] = W[t][0][d][h];
+
+            V[t][d][h] = W[t][0][d][h];
+          }
+        }
   }
 
   totfitdiff = fitdiff;
