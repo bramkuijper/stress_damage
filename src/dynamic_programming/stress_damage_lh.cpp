@@ -39,7 +39,7 @@ const double Kfec        = 0.0;    // parameter Kmort controlling increase in mo
 const int maxI        = 1000000; // maximum number of iterations
 const int maxT        = 100;     // maximum number of time steps since last saw predator
 const int maxH        = 500;     // maximum hormone level
-const int skip        = 10;      // interval between print-outs
+const int skip        = 1;      // interval between print-outs
 const int maxTs = 100; // duration of a season
 
 std::ofstream outputfile;  // output file
@@ -261,6 +261,7 @@ void OptDec()
                             (1.0-ddec)*Wopt[0][ts][d1]+ddec*Wopt[0][ts][d2]) // survive attack
                                 + (1.0-pPred[t]*pAttack)*(1.0-mu[d])*(repro[ts][d] +
                                         (1.0-ddec)*Wopt[t][ts][d1]+ddec*Wopt[t][ts][d2]); // no attack
+
                 } // end for h
             } // end for d
         } // end for t
@@ -272,30 +273,28 @@ void OptDec()
 /* OVERWRITE FITNESS ARRAY FROM PREVIOUS ITERATION */
 void ReplaceFit()
 {
-  int t,h,d,ts;
-  double fitdiff;
+    int t,h,d,ts;
+    double fitdiff;
 
-  fitdiff = 0.0;
+    fitdiff = 0.0;
 
-  // loop through t, d, h
-  // the values of maxTs - 1 are going to be set to ts = 0
-
-  for (t=1;t<maxT;t++)
-  {
+    for (t=1;t<maxT;t++)
+    {
         for (d=0;d<=maxD;++d)
         {
-          for (h=0;h<maxH;++h)
-          {
-            fitdiff = fitdiff + fabs(V[t][d][h]-W[t][0][d][h]);
+            for (h=0;h<maxH;++h)
+            {
+                std::cout << "V[" << t << "][" << d << "][" << h << "] " << V[t][d][h] << " " << W[t][0][d][h] << " " << fitdiff << std::endl;
+                fitdiff = fitdiff + fabs(V[t][d][h]-W[t][0][d][h]);
 
-            Wnext[t][maxTs - 1][d][h] = W[t][0][d][h];
+                Wnext[t][maxTs - 1][d][h] = W[t][0][d][h];
 
-            V[t][d][h] = W[t][0][d][h];
-          }
+                V[t][d][h] = W[t][0][d][h];
+            }
         }
-  }
+    }
 
-  totfitdiff = fitdiff;
+    totfitdiff = fitdiff;
 }
 
 
