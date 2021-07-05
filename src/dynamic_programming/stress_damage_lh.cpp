@@ -597,9 +597,9 @@ int main()
         std::cout << "i" << "\t" << "totfitdiff" << "\t" << std::endl;
 
         for (i=1;i<=maxI;++i)
-          {
-          OptDec();
-          ReplaceFit();
+        {
+            OptDec();
+            ReplaceFit();
 
 
  		  if (i%skip==0 || totfitdiff < 0.000001)
