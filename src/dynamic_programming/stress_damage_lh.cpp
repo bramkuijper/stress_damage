@@ -35,7 +35,7 @@ const double mu0      = 0.002;   // background mortality (independent of hormone
 const double phi_inv  = 1.0/((sqrt(5.0)+1.0)/2.0); // inverse of golden ratio (for golden section search)
 const int maxD        = 20;      // maximum damage level
 const double Kmort        = 0.01;    // parameter Kmort controlling increase in mortality with damage level
-const double Kfec        = 0.0;    // parameter Kmort controlling increase in mortality with damage level
+const double Kfec        = 0.05;    // parameter Kmort controlling increase in mortality with damage level
 const int maxI        = 1000000; // maximum number of iterations
 const int maxT        = 100;     // maximum number of time steps since last saw predator
 const int maxH        = 500;     // maximum hormone level
@@ -184,6 +184,11 @@ void Reproduction()
     for (d=0;d<=maxD;++d)
     {
         repro[ts][d] = ts == maxTs - 1 ? std::max(0.0, 1.0 - Kfec*double(d)) : 0.0;
+
+        if (maxTs - 1)
+        {
+            std::cout << repro[ts][d] << std::endl;
+        }
     }
   }
 } // end Reproduction()
@@ -193,9 +198,8 @@ void Reproduction()
 /* CALCULATE OPTIMAL DECISION FOR EACH t */
 void OptDec()
 {
-  int t,ts,h,d,d1,d2,
-    LHS,RHS,x1,x2,cal_x1,cal_x2;
-  double fitness,fitness_x1,fitness_x2,ddec;
+    int t,ts,h,d,d1,d2,LHS,RHS,x1,x2,cal_x1,cal_x2;
+    double fitness,fitness_x1,fitness_x2,ddec;
 
     // go from maxTs down to 0
     // start from maxTs - 2, as we need to reach back
@@ -221,10 +225,10 @@ void OptDec()
                   //    maxTs - 2 + 1 = maxTs - 1 (i.e., end of array)
                   //    0 + 1 = 1 (i.e., one off start of array
                   //    Wnext[ts = 0] will not be accessed
-                fitness_x1 = Wnext[std::min(maxT-1,t+1)][ts + 1][d][x2];
+                fitness_x1 = Wnext[std::min(maxT-1,t+1)][ts + 1][d][x1];
                 fitness_x2 = Wnext[std::min(maxT-1,t+1)][ts + 1][d][x2]; // fitness as a function of h=x2
-
-                if (fitness_x1<fitness_x2)
+    
+                if (fitness_x1 < fitness_x2)
                 {
                     LHS = x1;
                     x1 = x2;
@@ -261,7 +265,10 @@ void OptDec()
                             (1.0-ddec)*Wopt[0][ts][d1]+ddec*Wopt[0][ts][d2]) // survive attack
                                 + (1.0-pPred[t]*pAttack)*(1.0-mu[d])*(repro[ts][d] +
                                         (1.0-ddec)*Wopt[t][ts][d1]+ddec*Wopt[t][ts][d2]); // no attack
-
+//                    std::cout << "W[" << t << "][" << ts << "][" << d << "][" << h << "] " << V[t][d][h] << " " << W[t][ts][d][h] << " " << std::endl;
+//
+                    Wnext[t][ts][d][h] = W[t][ts][d][h];
+                
                 } // end for h
             } // end for d
         } // end for t
@@ -284,7 +291,7 @@ void ReplaceFit()
         {
             for (h=0;h<maxH;++h)
             {
-                std::cout << "V[" << t << "][" << d << "][" << h << "] " << V[t][d][h] << " " << W[t][0][d][h] << " " << fitdiff << std::endl;
+//                std::cout << "V[" << t << "][" << d << "][" << h << "] " << V[t][d][h] << " " << W[t][0][d][h] << " " << fitdiff << std::endl;
                 fitdiff = fitdiff + fabs(V[t][d][h]-W[t][0][d][h]);
 
                 Wnext[t][maxTs - 1][d][h] = W[t][0][d][h];
@@ -517,7 +524,7 @@ void SimAttacks()
     int treproduce = 40;
 
     // time since last reproductive event
-    // add +1 as we need to have ts == Tsmax
+    // add +1 as we need to have ts == Tsmax - 1
     // 1 timestep before treproduce and we start to count
     // time from 0
     int ts = maxTs - treproduce + 1;
