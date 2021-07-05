@@ -225,7 +225,8 @@ if seasonal:
                                 y.max()],
                     origin="lower",
                     aspect="auto",
-                    cmap=cm.get_cmap(name="Blues"))
+                    interpolation="none",
+                    cmap=cm.get_cmap(name="viridis"))
 
         the_fig.end_block(ax=the_axis
                 ,ylabel="Ts"
@@ -292,7 +293,7 @@ if nrow_attack > 0:
 the_fig.end_block(ax=the_axis
         ,ylabel="Hormone"
         ,yticks=True
-        ,ylim=[0,maxH])
+        ,ylim=[-0.01*maxH,maxH+0.01*maxH])
 
 ## plot simulated attacks: damage
 the_axis = the_fig.start_block(
@@ -320,7 +321,7 @@ the_fig.end_block(ax=the_axis
         ,xticks=True
         ,xlabel="Time"
         ,yticks=True
-        ,ylim=[0,maxD])
+        ,ylim=[-1,maxD+1])
 
 
 the_fig.close(tight=True)

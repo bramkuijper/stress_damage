@@ -28,14 +28,14 @@ const int seed        = std::time(0); // pseudo-random seed
 
 double pLeave;   // probability that predator leaves
 double pArrive;  // probability that predator arrives
-const double pAttack  = 0.5;     // probability that predator attacks if present
-const double alpha    = 1.0;     // parameter controlling effect of hormone level on pKilled
+double pAttack  = 0.5;     // probability that predator attacks if present
+double alpha    = 1.0;     // parameter controlling effect of hormone level on pKilled
 //const double beta     = 1.5;     // parameter controlling effect of hormone level on reproductive rate
 const double mu0      = 0.002;   // background mortality (independent of hormone level and predation risk)
 const double phi_inv  = 1.0/((sqrt(5.0)+1.0)/2.0); // inverse of golden ratio (for golden section search)
 const int maxD        = 20;      // maximum damage level
-const double Kmort        = 0.01;    // parameter Kmort controlling increase in mortality with damage level
-const double Kfec        = 0.05;    // parameter Kmort controlling increase in mortality with damage level
+double Kmort        = 0.0;    // parameter Kmort controlling increase in mortality with damage level
+double Kfec        = 0.05;    // parameter Kmort controlling increase in mortality with damage level
 const int maxI        = 1000000; // maximum number of iterations
 const int maxT        = 100;     // maximum number of time steps since last saw predator
 const int maxH        = 500;     // maximum hormone level
@@ -204,7 +204,7 @@ void OptDec()
     // go from maxTs down to 0
     // start from maxTs - 2, as we need to reach back
     // to array positions given by ts + 1
-    for (ts = maxTs - 2; ts >= 0; --ts)
+    for (ts = maxTs - 1; ts >= 0; --ts)
     {
       // calculate optimal decision h given current t, ts and d (N.B. t=0 if survived attack)
       // where h in t, ts, and d is unimodal
@@ -225,8 +225,8 @@ void OptDec()
                   //    maxTs - 2 + 1 = maxTs - 1 (i.e., end of array)
                   //    0 + 1 = 1 (i.e., one off start of array
                   //    Wnext[ts = 0] will not be accessed
-                fitness_x1 = Wnext[std::min(maxT-1,t+1)][ts + 1][d][x1];
-                fitness_x2 = Wnext[std::min(maxT-1,t+1)][ts + 1][d][x2]; // fitness as a function of h=x2
+                fitness_x1 = Wnext[std::min(maxT-1,t+1)][(ts + 1) % maxTs][d][x1];
+                fitness_x2 = Wnext[std::min(maxT-1,t+1)][(ts + 1) % maxTs][d][x2]; // fitness as a function of h=x2
     
                 if (fitness_x1 < fitness_x2)
                 {
@@ -302,7 +302,7 @@ void ReplaceFit()
     }
 
     totfitdiff = fitdiff;
-}
+} // void ReplaceFit()
 
 
 
@@ -513,7 +513,7 @@ void SimAttacks()
 
     // initialise individual (alive, no damage, no offspring, baseline hormone level) and starting environment (predator)
     //
-    int time_sim_max = 60;
+    int time_sim_max = 100;
 
     attack = false;
     time = 0; // time overall
@@ -562,32 +562,20 @@ void SimAttacks()
 } // end void SimAttacks()
 
 
+void init_params(int argc, char** argv)
+{
+    pLeave = atof(argv[1]);
+    pArrive = atof(argv[2]);
+    pAttack = atof(argv[3]);
+    alpha = atof(argv[4]);
+    Kmort = atof(argv[5]);
+    Kfec = atof(argv[6]);
+} // end init_params() 
 
 /* MAIN PROGRAM */
-int main()
+int main(int argc, char** argv)
 {
-
-    int xGrid,yGrid;
-    double risk,autocorr;
-
-    for(xGrid=1;xGrid<=3;xGrid++)
-      {
-      if (xGrid == 1) risk = 0.05;
-      if (xGrid == 2) risk = 0.1;
-      if (xGrid == 3) risk = 0.2;
-      for(yGrid=1;yGrid<=6;yGrid++)
-        {
-        if (yGrid == 1) autocorr = 0.0;
-        if (yGrid == 2) autocorr = 0.1;
-        if (yGrid == 3) autocorr = 0.3;
-        if (yGrid == 4) autocorr = 0.5;
-        if (yGrid == 5) autocorr = 0.7;
-        if (yGrid == 6) autocorr = 0.9;
-
-        pLeave = (1.0 - autocorr)/(1.0+(risk/(1.0-risk)));
-        pArrive = 1.0 - pLeave - autocorr;
-//    pLeave= 0.095;
-//    pArrive = 0.005;
+    init_params(argc, argv);
 
 		///////////////////////////////////////////////////////
 		outfile.str("");
@@ -640,9 +628,6 @@ int main()
 
 //        fwdCalc();
         SimAttacks();
-
-        }
-      }
 
   return 0;
 }
