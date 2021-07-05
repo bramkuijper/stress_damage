@@ -39,7 +39,7 @@ const double Kfec        = 0.0;    // parameter Kmort controlling increase in mo
 const int maxI        = 1000000; // maximum number of iterations
 const int maxT        = 100;     // maximum number of time steps since last saw predator
 const int maxH        = 500;     // maximum hormone level
-const int skip        = 10;      // interval between print-outs
+const int skip        = 1;      // interval between print-outs
 const int maxTs = 100; // duration of a season
 
 std::ofstream outputfile;  // output file
@@ -66,23 +66,33 @@ double repro[maxTs][maxD+1];       // reproductive output
 //double F[maxT][maxTs][maxD+1][maxH];     // frequency of individuals at start of time step, before predator does/doesn't attack
 //double Fnext[maxT][maxTs][maxD+1][maxH]; // frequency of individuals at start of next time step
 
+// Wopt
 std::vector < std::vector < std::vector<double> > > 
     Wopt(maxT, std::vector < std::vector <double> >(maxTs, std::vector<double>(maxD+1, 0.0)));
 
+// W
 std::vector < std::vector < std::vector < std::vector <double> > > > 
     W(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
 
+// reproductive value V    
+std::vector < std::vector < std::vector<double> > > 
+    V(maxT, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0)));
+
+// Wnext
 std::vector < std::vector < std::vector < std::vector <double> > > > 
     Wnext(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
 
+// F
 std::vector < std::vector < std::vector < std::vector <double> > > > 
     F(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
 
+// Fnext
 std::vector < std::vector < std::vector < std::vector <double> > > > 
     Fnext(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
 
 
-double pPred[maxT];               // probability that predator is present
+    
+    double pPred[maxT];               // probability that predator is present
 double totfitdiff;                // fitness difference between optimal strategy in successive iterations
 
 int i;     // iteration
@@ -99,7 +109,7 @@ void FinalFit()
         {
             for (h=0;h<maxH;++h)
             {
-                Wnext[t][maxTs - 1][d][h] = repro[maxTs - 1][d];
+               V[t][d][h] =  Wnext[t][maxTs - 1][d][h] = repro[maxTs - 1][d];
             }
         }
     }
@@ -251,6 +261,7 @@ void OptDec()
                             (1.0-ddec)*Wopt[0][ts][d1]+ddec*Wopt[0][ts][d2]) // survive attack
                                 + (1.0-pPred[t]*pAttack)*(1.0-mu[d])*(repro[ts][d] +
                                         (1.0-ddec)*Wopt[t][ts][d1]+ddec*Wopt[t][ts][d2]); // no attack
+
                 } // end for h
             } // end for d
         } // end for t
@@ -262,27 +273,28 @@ void OptDec()
 /* OVERWRITE FITNESS ARRAY FROM PREVIOUS ITERATION */
 void ReplaceFit()
 {
-  int t,h,d,ts;
-  double fitdiff;
+    int t,h,d,ts;
+    double fitdiff;
 
-  fitdiff = 0.0;
+    fitdiff = 0.0;
 
-  for (t=1;t<maxT;t++)
-  {
-      for (ts = 0; ts < maxTs; ++ts)
-      {
-            for (d=0;d<=maxD;++d)
+    for (t=1;t<maxT;t++)
+    {
+        for (d=0;d<=maxD;++d)
+        {
+            for (h=0;h<maxH;++h)
             {
-              for (h=0;h<maxH;++h)
-              {
-                fitdiff = fitdiff + fabs(Wnext[t][ts][d][h]-W[t][ts][d][h]);
-                Wnext[t][ts][d][h] = W[t][ts][d][h];
-              }
-            }
-      }
-  }
+                std::cout << "V[" << t << "][" << d << "][" << h << "] " << V[t][d][h] << " " << W[t][0][d][h] << " " << fitdiff << std::endl;
+                fitdiff = fitdiff + fabs(V[t][d][h]-W[t][0][d][h]);
 
-  totfitdiff = fitdiff;
+                Wnext[t][maxTs - 1][d][h] = W[t][0][d][h];
+
+                V[t][d][h] = W[t][0][d][h];
+            }
+        }
+    }
+
+    totfitdiff = fitdiff;
 }
 
 
