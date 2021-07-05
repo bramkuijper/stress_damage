@@ -221,7 +221,7 @@ void OptDec()
                   //    maxTs - 2 + 1 = maxTs - 1 (i.e., end of array)
                   //    0 + 1 = 1 (i.e., one off start of array
                   //    Wnext[ts = 0] will not be accessed
-                fitness_x1 = Wnext[std::min(maxT-1,t+1)][ts + 1][d][x2];
+                fitness_x1 = Wnext[std::min(maxT-1,t+1)][ts + 1][d][x1];
                 fitness_x2 = Wnext[std::min(maxT-1,t+1)][ts + 1][d][x2]; // fitness as a function of h=x2
 
                 if (fitness_x1<fitness_x2)
