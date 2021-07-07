@@ -17,7 +17,7 @@ for autocorr_i in autocorr:
         pLA += [[round(pL,4),round(pA,4)]]
 
 Kfec = [ 0.05 ]
-Kmort = [ 0 ]
+Kmort = [ 0.01 ]
 
 pAttack = [0.5]
 

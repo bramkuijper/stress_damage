@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <chrono>
 #include <string>
+#include <cassert>
 
 // constants, type definitions, etc.
 const int seed        = std::time(0); // pseudo-random seed
@@ -40,7 +41,7 @@ const int maxI        = 1000000; // maximum number of iterations
 const int maxT        = 100;     // maximum number of time steps since last saw predator
 const int maxH        = 500;     // maximum hormone level
 const int skip        = 1;      // interval between print-outs
-const int maxTs = 100; // duration of a season
+const int maxTs = 10; // duration of a season
 
 std::ofstream outputfile;  // output file
 std::ofstream fwdCalcfile; // forward calculation output file
@@ -143,7 +144,7 @@ void Predation()
   {
     pKilled[h] = 1.0 - pow(double(h)/double(maxH),alpha);
   }
-}
+} // end Predation()
 
 
 /* CALCULATE BACKGROUND MORTALITY */
@@ -155,7 +156,7 @@ void Mortality()
   {
     mu[d] = std::min(1.0,mu0 + Kmort*double(d));
   }
-}
+} // end Mortality()
 
 
 
@@ -489,7 +490,7 @@ void fwdCalc()
 /* Simulated series of attacks */
 void SimAttacks()
 {
-  int i,time,t,d,h,d1,d2;
+  int i,time_i,t,d,h,d1,d2;
   double //r,
     ddec;
   bool attack;
@@ -509,14 +510,14 @@ void SimAttacks()
   attsimfile.open(attsimfilename.c_str());
   ///////////////////////////////////////////////////////
 
-  attsimfile << "time" << "\t" << "t" << "\t" << "ts" << "\t" << "damage" << "\t" << "hormone" << "\t" << "attack" << std::endl; // column headings in output file
+  attsimfile << "time" << "\t" << "t" << "\t" << "ts" << "\t" << "damage" << "\t" << "hormone" << "\t" << "attack" << "\t" << "reproduce" << "\t" << std::endl; // column headings in output file
 
     // initialise individual (alive, no damage, no offspring, baseline hormone level) and starting environment (predator)
     //
-    int time_sim_max = 100;
+    int time_sim_max = maxTs*3;
 
     attack = false;
-    time = 0; // time overall
+    time_i = 0; // time overall
     t = 50; // time since attack
    
     // time point in between 0 and time_sim_max 
@@ -527,15 +528,17 @@ void SimAttacks()
     // add +1 as we need to have ts == Tsmax - 1
     // 1 timestep before treproduce and we start to count
     // time from 0
-    int ts = maxTs - treproduce + 1;
+    int ts = maxTs - 1 - treproduce;
+
+    int reproduce = 0;
 
     d = 0;
     //    r = 0.0;
     h = hormone[t][ts][d];
 
-    for(time = 0; time < time_sim_max; ++time)
+    for(time_i = 0; time_i < time_sim_max; ++time_i)
     {
-      if (time > 16 && time < 33) // predator attacks
+      if (time_i > 16 && time_i < 33) // predator attacks
       {
         t = 0;
         attack = true;
@@ -546,16 +549,26 @@ void SimAttacks()
         attack = false;
       }
 
+      if (t >= maxT -1)
+      {
+          t = maxT - 1;
+      }
+
       h = hormone[t][ts % maxTs][d];
 
       d1 = floor(dnew[d][h]);
       d2 = ceil(dnew[d][h]);
       ddec = dnew[d][h]-d1;
 
+      reproduce = ts % (maxTs - 1);
+
       if (Uniform(mt)<ddec) d = d2; else d = d1;
-      attsimfile << time << "\t" << t << "\t" << ts << "\t" << d << "\t" << h << "\t" << attack << "\t" << std::endl; // print data
+
+      attsimfile << time_i << "\t" << t << "\t" << ts << "\t" << d << "\t" << h << "\t" << attack << "\t" << reproduce << "\t" << std::endl; // print data
       ++ts;
-    } // while (time <= time_sim_max)
+    } // for time_i time sim max
+
+    std::cout << time_sim_max << std::endl;
 
   attsimfile.close();
 

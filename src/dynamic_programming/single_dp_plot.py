@@ -129,6 +129,8 @@ end_line, pardict = find_footer(file_name)
 
 maxH = pardict["maxH"]
 maxD = pardict["maxD"]
+Kfec = pardict["Kfec"]
+Kmort = pardict["Kmort"]
 
 seasonal = False
 
@@ -191,12 +193,28 @@ nrows += len(damage_val_select) if seasonal else 1
 
 
 the_fig = multipanel.MultiPanel(
-        panel_widths=[1]
+        panel_widths=[1,0.1]
         ,panel_heights=[1 for x in range(0,nrows)]
         ,filename="plot_" + file_root + ".pdf"
         ,hspace=0.3
         ,width=8
         ,height=15
+        )
+
+
+pA = pardict["pArrive"]
+pL = pardict["pLeave"]
+
+autocorrelation = round(1.0 - pA - pL,4)
+risk = round(pA / (pA + pL),4)
+
+the_fig.fig.text(x=0.5
+        ,y=0.99
+        ,horizontalalignment="center"
+        ,s="Autocorrelation: " + str(autocorrelation) + 
+        ", risk: " + str(risk) +
+        ", Kfec: " + str(Kfec) +
+        ", Kmort: " + str(Kmort)
         )
 
 rowctr = 0
@@ -218,26 +236,51 @@ if seasonal:
                 ,y="ts"
                 ,z="hormone")
 
-        the_axis.imshow(z,
+        imshow_colorset = the_axis.imshow(z,
                     extent=[x.min(),
                                 x.max(),
                                 y.min(),
                                 y.max()],
                     origin="lower",
                     aspect="auto",
+                    vmin=0,
+                    vmax=maxH,
                     interpolation="none",
                     cmap=cm.get_cmap(name="viridis"))
 
         the_fig.end_block(ax=the_axis
-                ,ylabel="Ts"
+                ,ylabel="Seasonal time, $t_{s}$" if d_i == damage_val_select[2] else ""
                 ,xticks=damage_val_select.index(d_i) == len(damage_vals)
                 ,yticks=True
-                ,xlabel="Time"
-                ,title=r"Damage = " + str(d_i))
+                ,xlabel="Time since attack, $t$" if d_i == max(damage_val_select) else ""
+                ,title=r"Damage, $d$ = " + str(d_i))
+
+        if d_i == min(damage_val_select):
+
+            the_axis = the_fig.start_block(
+                    row=rowctr
+                    ,col=1)
+
+            cbar = the_fig.fig.colorbar(
+                    mappable=imshow_colorset
+                    ,cax=the_axis
+                    ,ticks=list(range(0,500,100))
+                    )
+
+            cbar.ax.set_ylabel(
+                    ylabel="Hormone")
+
+            the_fig.end_block(ax=the_axis
+                    ,xticks=False
+                    ,yticks=True
+                    ,ylim=[0,500]
+                    ,xlabel=""
+                    ,ylabel="Hormone")
 
         rowctr += 1
 
 else:
+
     the_axis = the_fig.start_block(
             row=rowctr
             ,col=0)
@@ -257,7 +300,7 @@ else:
             ,ylabel="Hormone"
             ,xticks=True
             ,yticks=True
-            ,xlabel="Time")
+            ,xlabel="Time since attack, $t$")
 
     rowctr += 1
 
@@ -277,8 +320,10 @@ the_axis.plot(sim_attack_data["time"]
 
 # now plot the timepoints at which an attack took place
 attack_data_fltr = sim_attack_data[sim_attack_data["attack"] == 1]
+reproduction_fltr = sim_attack_data[sim_attack_data["reproduce"] == 1]
 
 nrow_attack = attack_data_fltr.shape[0]
+nrow_reproduce = reproduction_fltr.shape[0]
 
 if nrow_attack > 0:
     the_axis.plot(attack_data_fltr["time"],
@@ -288,6 +333,17 @@ if nrow_attack > 0:
             markersize=3,
             markerfacecolor="red",
             markeredgecolor="red"
+            )
+
+
+if nrow_reproduce > 0:
+    the_axis.plot(reproduction_fltr["time"],
+            [1.0/10 * maxH for x in range(0, nrow_reproduce,1)],
+            linestyle="",
+            marker="o",
+            markersize=3,
+            markerfacecolor="darkgreen",
+            markeredgecolor="darkgreen"
             )
 
 the_fig.end_block(ax=the_axis
@@ -316,10 +372,20 @@ if nrow_attack > 0:
             markeredgecolor="red"
             )
 
+if nrow_reproduce > 0:
+    the_axis.plot(reproduction_fltr["time"],
+            [2 for x in range(0, nrow_reproduce,1)],
+            linestyle="",
+            marker="o",
+            markersize=3,
+            markerfacecolor="darkgreen",
+            markeredgecolor="darkgreen"
+            )
+
 the_fig.end_block(ax=the_axis
         ,ylabel="Damage"
         ,xticks=True
-        ,xlabel="Time"
+        ,xlabel="Time since attack, $t$"
         ,yticks=True
         ,ylim=[-1,maxD+1])
 
