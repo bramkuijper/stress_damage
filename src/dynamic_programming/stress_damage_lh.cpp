@@ -41,7 +41,7 @@ const int maxI        = 1000000; // maximum number of iterations
 const int maxT        = 100;     // maximum number of time steps since last saw predator
 const int maxH        = 500;     // maximum hormone level
 const int skip        = 1;      // interval between print-outs
-const int maxTs = 10; // duration of a season
+const int maxTs = 100; // duration of a season
 
 std::ofstream outputfile;  // output file
 std::ofstream fwdCalcfile; // forward calculation output file
@@ -52,7 +52,7 @@ std::stringstream outfile; // for naming output file
 std::mt19937 mt(seed); // random number generator
 std::uniform_real_distribution<double> Uniform(0, 1); // real number between 0 and 1 (uniform)
 
-///int hormone[maxT][maxTs][maxD+1];        // hormone level (strategy)
+// vector for hormone[maxT][maxTs][maxD+1];
 std::vector < std::vector < std::vector<int> > > 
     hormone(maxT, std::vector < std::vector <int> >(maxTs, std::vector<int>(maxD + 1, 0)));
 
@@ -60,22 +60,35 @@ double pKilled[maxH];             // probability of being killed by an attacking
 double mu[maxD+1];                // probability of background mortality, as a function of damage
 double dnew[maxD+1][maxH];        // new damage level, as a function of previous damage and hormone
 double repro[maxTs][maxD+1];       // reproductive output
-//double Wopt[maxT][maxTs][maxD+1];        // fitness immediately after predator has/hasn't attacked, under optimal decision h
-//double W[maxT][maxTs][maxD+1][maxH];     // expected fitness at start of time step, before predator does/doesn't attack
-//double Wnext[maxT][maxTs][maxD+1][maxH]; // expected fitness at start of next time step
-//
-//double F[maxT][maxTs][maxD+1][maxH];     // frequency of individuals at start of time step, before predator does/doesn't attack
-//double Fnext[maxT][maxTs][maxD+1][maxH]; // frequency of individuals at start of next time step
 
-// Wopt
+// vector of maximum fitness values
+// Wopt[maxT][maxTs][maxD+1]
+// (corresponding to best choice of hormone level)
+// for each...
+// - time step after attack
+// - time step of season
+// - level of damage
 std::vector < std::vector < std::vector<double> > > 
     Wopt(maxT, std::vector < std::vector <double> >(maxTs, std::vector<double>(maxD+1, 0.0)));
 
-// W
+// vector of fitness values
+// W[maxT][maxTs][maxD+1][maxH]
+// for each...
+// - time step after attack
+// - time step of season
+// - level of damage
+// - level of hormone
 std::vector < std::vector < std::vector < std::vector <double> > > > 
     W(maxT, std::vector < std::vector < std::vector <double> > >(maxTs, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0))));
 
-// reproductive value V    
+// vector of reproductive values
+// V[maxT][maxD+1][maxH]
+// for each...
+// - time step after attack
+// - level of damage
+// - level of hormone
+// (note that time step of season does not feature here
+// as reproduction only takes place at particular times)
 std::vector < std::vector < std::vector<double> > > 
     V(maxT, std::vector < std::vector <double> >(maxD+1, std::vector<double>(maxH, 0.0)));
 
@@ -93,7 +106,7 @@ std::vector < std::vector < std::vector < std::vector <double> > > >
 
 
     
-    double pPred[maxT];               // probability that predator is present
+double pPred[maxT];               // probability that predator is present
 double totfitdiff;                // fitness difference between optimal strategy in successive iterations
 
 int i;     // iteration
@@ -420,8 +433,7 @@ void fwdCalc()
       } // end for t
 
       // NORMALISE AND OVERWRITE FREQUENCIES
-      Fnext[1][0][0][0] = Fnext[1][0][0][0]/(1.0-predDeaths-damageDeaths); // normalise
-      maxfreqdiff = abs(F[1][0][0][0] - Fnext[1][0][0][0]);
+        double maxdiffcalc = 0.0;
 
       for (t=1;t<maxT;t++)
       {
@@ -432,13 +444,17 @@ void fwdCalc()
               for (h=0;h<maxH;h++)
               {
                 Fnext[t][ts][d][h] = Fnext[t][ts][d][h]/(1.0-predDeaths-damageDeaths); // normalise
-                maxfreqdiff = std::max(maxfreqdiff,fabs(F[t][ts][d][h]-Fnext[t][ts][d][h])); // stores largest frequency difference so far
+                maxdiffcalc = std::max(maxdiffcalc,
+                        fabs(F[t][ts][d][h]-Fnext[t][ts][d][h])); // stores largest frequency difference so far
                 F[t][ts][d][h] = Fnext[t][ts][d][h]; // next time step becomes this time step
                 Fnext[t][ts][d][h] = 0.0; // wipe next time step
               } // end for h
             } // end for d
           } // end for ts
       }
+
+      maxfreqdiff = maxdiffcalc;
+
       if (i%skip==0)
       {
         std::cout << i << "\t" << maxfreqdiff << std::endl; // show fitness difference every 'skip' generations
@@ -522,7 +538,7 @@ void SimAttacks()
    
     // time point in between 0 and time_sim_max 
     // at which reproduction takes place
-    int treproduce = 40;
+    int treproduce = 80;
 
     // time since last reproductive event
     // add +1 as we need to have ts == Tsmax - 1

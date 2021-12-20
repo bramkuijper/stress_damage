@@ -26,10 +26,11 @@ alpha = 1.0
 
 exe = "stress_damage_lh.exe"
 
+suppress_echo = True 
 
 the_dir = "./"
 
-background = True
+background = False
 
 ctr = 1
 
@@ -38,7 +39,8 @@ for pLA_i in pLA:
         for Kmort_i in Kmort:
             for pAttack_i in pAttack:
 
-                print("echo " + str(ctr))
+                if not suppress_echo:
+                    print("echo " + str(ctr))
 
                 print(os.path.join(the_dir,exe) + " " +
                         str(pLA_i[0]) + " " +
