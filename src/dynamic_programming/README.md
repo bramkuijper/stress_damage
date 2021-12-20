@@ -4,8 +4,11 @@ In Taborsky et al (2021) Trends Ecol Evol, we investigated the evolution of stre
 
 Here we relax this assumption and allow damage `d` to accumulate, where damage accumulation increases with hormone expression `h` and decreases with repair `r`.
 
-## Compiling the code
-The source code of the dynamic programming model is written in `C++` and is available in the file `stress_damage_lh.cpp`. Compiling the programme can be done by running
+## The dynamic programming model
+The source code of the dynamic programming model is written in `C++` and is available in the file `stress_damage_lh.cpp`. 
+
+## Compiling the code 
+The code can be run by doing:
 ```
 make
 ```
