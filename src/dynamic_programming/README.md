@@ -2,7 +2,7 @@
 
 In Taborsky et al (2021) Trends Ecol Evol, we investigated the evolution of stress responses in an autocorrelated environment without the accumulation of stress-related damage.
 
-Here we relax this assumption and allow damage `d` to accumulate, where damage accumulation increases with hormone expression `h` and decreases with repair `r`.
+Here we relax this assumption and allow damage *d* to accumulate, where damage accumulation increases with hormone expression *h* and decreases with repair *r*. The environment is a seasonal one, in which individuals experience mortality selection every time step (a high hormone level implies a low probability of mortality in the presence of a mortality, at the expense of a high level of *d*). Individuals experience fecundity selection only at time <img src="https://render.githubusercontent.com/render/math?math=t  = t_{s}">, where fecundity is not directly affected by *h* but is affected by *d*.
 
 ## The dynamic programming model
 The source code of the dynamic programming model is written in `C++` and is available in the file `stress_damage_lh.cpp`. 
