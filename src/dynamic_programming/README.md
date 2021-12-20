@@ -18,4 +18,34 @@ bash run_single_dp.sh
 ```
 
 ## Algorithm to vary the parameters
-Parameters can also be varied by using a bunch of `for`-loops provided in the Python3 script `vary_params.py`. 
+Parameters can also be varied by using a bunch of `for`-loops provided in the Python3 script `vary_params.py`. A file called `runs.sh` containing a series of commands to run replicate simulations can be obtained by running
+```
+./vary_params.py > runs.sh
+```
+
+The file will look like
+```
+./stress_damage_lh.exe 0.95 0.05 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.9 0.1 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.8 0.2 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.855 0.045 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.81 0.09 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.72 0.18 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.665 0.035 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.63 0.07 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.56 0.14 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.475 0.025 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.45 0.05 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.4 0.1 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.285 0.015 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.27 0.03 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.24 0.06 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.095 0.005 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.09 0.01 0.5 1.0 0.001 0.01
+./stress_damage_lh.exe 0.08 0.02 0.5 1.0 0.001 0.01
+```
+
+This can then be run in a bash shell by running
+```
+bash runs.sh
+```
