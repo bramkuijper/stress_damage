@@ -495,10 +495,10 @@ void SimAttacks()
 
   for (time=0;time<=100;time++) // wipe stats arrays
   {
-     sumD[time+1] = 0.0;
-     sumsqD[time+1] = 0.0;
-     sumH[time+1] = 0.0;
-     sumsqH[time+1] = 0.0;
+     sumD[time] = 0.0;
+     sumsqD[time] = 0.0;
+     sumH[time] = 0.0;
+     sumsqH[time] = 0.0;
   }
 
   for (i=1;i<=nInd;i++) // simulate nInd individuals
@@ -510,7 +510,7 @@ void SimAttacks()
       //    r = 0.0;
       h = hormone[t][d];
 
-      while (time <= 100)
+      while (time < 100)
       {
         if (time > 10) // predator attacks
         {
@@ -537,7 +537,7 @@ void SimAttacks()
       }
   }
 
-  for (time=0;time<=100;time++) // run through time steps
+  for (time=0;time<100;time++) // run through time steps
   {
     meanD[time+1] = sumD[time+1]/double(nInd);
     varD[time+1] = sumsqD[time+1]/double(nInd)-meanD[time+1]*meanD[time+1];
