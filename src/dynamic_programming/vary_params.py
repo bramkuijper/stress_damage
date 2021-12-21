@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import numpy as np
-import os.path
+import os.path, sys
 
+# specify values of the autocorrelation and risk
 autocorr = [ 0, 0.1, 0.3, 0.5, 0.7, 0.9 ]
 risk = [ 0.05, 0.1, 0.2 ]
 
-# probabilities of leaving and arriving
-
+# translate those in probabilities
+# of leaving and arriving
 pLA = []
 
 for autocorr_i in autocorr:
@@ -24,7 +25,10 @@ pAttack = [0.5]
 alpha = 1.0
 
 
-exe = "stress_damage_lh.exe"
+repair = [1.0,10.0,50.0,100.0]
+
+#exe = "stress_damage_lh.exe"
+exe = "stress_damage.exe"
 
 suppress_echo = True 
 
@@ -34,6 +38,22 @@ background = False
 
 ctr = 1
 
+full_exe_name = os.path.join(the_dir,exe)
+
+# standard exe
+if "lh" not in exe:
+    for autocorr_i in autocorr:
+        for risk_i in risk:
+            for repair_i in repair:
+                print(f"{full_exe_name} {autocorr_i} "
+                        + f"{risk_i} {repair_i}")
+
+                ctr+=1
+    sys.exit(1)
+
+
+
+
 for pLA_i in pLA:
     for Kfec_i in Kfec:
         for Kmort_i in Kmort:
@@ -42,7 +62,7 @@ for pLA_i in pLA:
                 if not suppress_echo:
                     print("echo " + str(ctr))
 
-                print(os.path.join(the_dir,exe) + " " +
+                print(full_exe_name + " " +
                         str(pLA_i[0]) + " " +
                         str(pLA_i[1]) + " " +
                         str(pAttack_i) + " " +

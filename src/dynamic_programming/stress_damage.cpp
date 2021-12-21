@@ -43,10 +43,15 @@ const double pAttack  = 0.5;     // probability that predator attacks if present
 const double alpha    = 1.0;     // parameter controlling effect of hormone level on pKilled
 //const double beta     = 1.5;     // parameter controlling effect of hormone level on reproductive rate
 const double mu0      = 0.002;   // background mortality (independent of hormone level and predation risk)
-const double phi_inv  = 1.0/((sqrt(5.0)+1.0)/2.0); // inverse of golden ratio (for golden section search)
+//const double phi_inv  = 1.0/((sqrt(5.0)+1.0)/2.0); // inverse of golden ratio (for golden section search)
 const double hmin     = 0.3;     // level of hormone that minimises damage
 const double hslope   = 20.0;     // slope parameter controlling increase in damage with deviation from hmin
-const int repair      = 1;      // damage units removed per time step
+
+// damage units removed per time step
+// this can be (re)set through the command line
+int repair      = 1;      
+
+
 const double K        = 0.001;   // parameter K controlling increase in mortality with damage level
 const int maxD        = (1.0-mu0)/K; // maximum damage level
 const int maxI        = 100000;   // maximum number of iterations
@@ -292,7 +297,11 @@ void PrintParams()
 void fwdCalc()
 {
   int t,d,h,d1,d2,h1,h2,i,age;
-  double ddec,totSurv,totPredDeaths,totDamageDeaths,totBkgrndDeaths;
+  double ddec = 0.0;
+  double totSurv = 0.0;
+  double totPredDeaths = 0.0;
+  double totDamageDeaths = 0.0;
+  double totBkgrndDeaths = 0.0;
 
   for (t=1;t<=maxT;t++) // note that F is undefined for t=0 because t=1 if predator has just attacked
   {
@@ -544,28 +553,11 @@ void SimAttacks()
 
 
 /* MAIN PROGRAM */
-int main()
+int main(int argc, char **argv)
 {
-
-int xGrid,yGrid;
-double risk,autocorr;
-
-    for(xGrid=1;xGrid<=2;xGrid++)
-      {
-      if (xGrid == 1) risk = 0.05;
-      if (xGrid == 2) risk = 0.1;
-      if (xGrid == 3) risk = 0.2;
-      for(yGrid=1;yGrid<=3;yGrid++)
-        {
-        if (yGrid == 1) autocorr = 0.0;
-        if (yGrid == 2) autocorr = 0.3;
-        if (yGrid == 3) autocorr = 0.9;
-//        if (yGrid == 1) autocorr = 0.0;
-//        if (yGrid == 2) autocorr = 0.1;
-//        if (yGrid == 3) autocorr = 0.3;
-//        if (yGrid == 4) autocorr = 0.5;
-//        if (yGrid == 5) autocorr = 0.7;
-//        if (yGrid == 6) autocorr = 0.9;
+    double autocorr = atof(argv[1]);
+    double risk = atof(argv[2]);
+    repair = atoi(argv[3]);
 
         pLeave = (1.0 - autocorr)/(1.0+(risk/(1.0-risk)));
         pArrive = 1.0 - pLeave - autocorr;
@@ -618,9 +610,6 @@ double risk,autocorr;
 
         fwdCalc();
         SimAttacks();
-
-        }
-      }
 
   return 0;
 }
