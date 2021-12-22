@@ -385,6 +385,8 @@ void fwdCalc()
   outfile << std::fixed << pArrive;
   outfile << "K";
   outfile << std::fixed << K;
+outfile << "r";
+outfile << std::fixed << repair;
   outfile << ".txt";
   string fwdCalcfilename = outfile.str();
   fwdCalcfile.open(fwdCalcfilename.c_str());
@@ -426,6 +428,8 @@ void SimAttacks()
   outfile << std::fixed << pArrive;
   outfile << "K";
   outfile << std::fixed << K;
+    outfile << "r";
+    outfile << std::fixed << repair;
   outfile << ".txt";
   string attsimfilename = outfile.str();
   attsimfile.open(attsimfilename.c_str());
@@ -572,6 +576,8 @@ int main(int argc, char **argv)
 		outfile << std::fixed << pArrive;
 		outfile << "K";
 		outfile << std::fixed << K;
+		outfile << "r";
+		outfile << std::fixed << repair;
 		outfile << ".txt";
 		string outputfilename = outfile.str();
 		outputfile.open(outputfilename.c_str());
