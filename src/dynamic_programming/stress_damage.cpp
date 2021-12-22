@@ -486,7 +486,7 @@ void SimAttacks()
     varD[time+1] = sumsqD[time+1]/double(nInd)-meanD[time+1]*meanD[time+1];
     meanH[time+1] = sumH[time+1]/double(nInd);
     varH[time+1] = sumsqH[time+1]/double(nInd)-meanH[time+1]*meanH[time+1];
-    attsimfile << time << "\t" << attack[time+1] << "\t" << t << "\t" << meanD[time+1] << "\t" << sqrt(varD[time+1]) << "\t" << meanH[time+1] << "\t" << sqrt(varH[time+1]) << endl; // print data
+    attsimfile << time << "\t" << attack[time+1] << "\t" << t << "\t" << meanD[time+1] << "\t" << sqrt(varD[time+1]) << "\t" << meanH[time+1] << "\t" << sqrt(varH[time+1]) << "\t" << endl; // print data
   }
 
   attsimfile << endl;
@@ -543,7 +543,7 @@ void SimAttacks()
     varD[time+1] = sumsqD[time+1]/double(nInd)-meanD[time+1]*meanD[time+1];
     meanH[time+1] = sumH[time+1]/double(nInd);
     varH[time+1] = sumsqH[time+1]/double(nInd)-meanH[time+1]*meanH[time+1];
-    attsimfile << time << "\t" << attack[time+1] << "\t" << t << "\t" << meanD[time+1] << "\t" << sqrt(varD[time+1]) << "\t" << meanH[time+1] << "\t" << sqrt(varH[time+1]) << endl; // print data
+    attsimfile << time << "\t" << attack[time+1] << "\t" << t << "\t" << meanD[time+1] << "\t" << sqrt(varD[time+1]) << "\t" << meanH[time+1] << "\t" << sqrt(varH[time+1]) << "\t" << endl; // print data
   }
 
   attsimfile.close();
