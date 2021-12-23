@@ -56,6 +56,7 @@ for (filename_i in all.files)
     params["h_base_c"] <- h.base
     params["h_max_a"] <- max.h.a
     params["h_base_a"] <- h.base.a
+    params["file"] <- filename_i
 
     summary.data <- rbind(summary.data,params)
 }
