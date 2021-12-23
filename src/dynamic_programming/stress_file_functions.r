@@ -1,9 +1,10 @@
-
+library("readr")
 #' Function that reads parameters from 
 #' the simulation output file 'stressLXXXXXX.txt
 #' @param filename a string containing the name of the 'stressLXXXX' file
 #' @return data frame with parameter names as column names and parameter values
 #' as the corresponding row
+
 read.parameters <- function(filename)
 {
     # read the file as a list of lines

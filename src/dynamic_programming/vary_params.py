@@ -25,7 +25,7 @@ pAttack = [0.5]
 alpha = 1.0
 
 
-repair = [1.0,10.0,50.0,100.0]
+repair = [2.0,3.0,4.0,5.0]
 
 #exe = "stress_damage_lh.exe"
 exe = "stress_damage.exe"

@@ -80,7 +80,7 @@ p4 <- ggplot(data.attack.chronic) +
 
 # now a levelplot showing the stress levels
 p5 <- ggplot(data=data.strategy) +
-        geom_raster(aes(x = t, y = d, fill = hormone)) +
+        geom_tile(aes(x = t, y = d, fill = hormone)) +
         scale_x_continuous(limits = c(0,50), expand=c(0,0)) +
         scale_y_continuous(limits = c(0,1000), expand=c(0,0)) +
         scale_fill_viridis() +
