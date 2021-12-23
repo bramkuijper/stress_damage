@@ -44,15 +44,20 @@ ctr = 1
 
 full_exe_name = os.path.join(the_dir,exe)
 
+nrep = 10
+
 # standard exe
 if "lh" not in exe:
     for autocorr_i in autocorr:
         for risk_i in risk:
             for repair_i in repair:
-                print(f"{full_exe_name} {autocorr_i} "
-                        + f"{risk_i} {repair_i}")
+                for rep_i in range(0,nrep):
+                    print(f"{full_exe_name} {autocorr_i} "
+                            + f"{risk_i} {repair_i} "
+                            + f"{rep_i} "
+                            )
 
-                ctr+=1
+                    ctr+=1
     sys.exit(1)
 
 
