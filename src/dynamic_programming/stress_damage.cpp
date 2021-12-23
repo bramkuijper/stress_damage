@@ -34,8 +34,8 @@
 
 using namespace std;
 
-const int seed        = time(0); // pseudo-random seed
-//const int seed      = << enter seed here >>;
+random_device rd;
+unsigned seed = rd();
 
 double pLeave;   // probability that predator leaves
 double pArrive;  // probability that predator arrives
