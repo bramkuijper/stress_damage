@@ -4,7 +4,7 @@ import os.path, sys
 
 # specify values of the autocorrelation and risk
 autocorr = [ 0, 0.1, 0.3, 0.5  ]
-risk = [ 0.05, 0.1, 0.2,0.5 ]
+risk = [ 0.3,0.4,0.6,0.7,0.8 ]
 
 # translate those in probabilities
 # of leaving and arriving
