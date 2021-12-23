@@ -3,8 +3,11 @@ import numpy as np
 import os.path, sys
 
 # specify values of the autocorrelation and risk
-autocorr = [ 0, 0.1, 0.3, 0.5, 0.7, 0.9 ]
-risk = [ 0.05, 0.1, 0.2 ]
+#autocorr = [ 0, 0.1, 0.3, 0.5, 0.7, 0.9 ]
+#risk = [ 0.05, 0.1, 0.2 ]
+
+autocorr = [ 0.3 ]
+risk = [ 0.2 ]
 
 # translate those in probabilities
 # of leaving and arriving
@@ -25,7 +28,7 @@ pAttack = [0.5]
 alpha = 1.0
 
 
-repair = [1.0,10.0,50.0,100.0]
+repair = [0.0,1.0]
 
 #exe = "stress_damage_lh.exe"
 exe = "stress_damage.exe"
