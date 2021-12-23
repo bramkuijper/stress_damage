@@ -49,7 +49,7 @@ const double hslope   = 20.0;     // slope parameter controlling increase in dam
 
 // damage units removed per time step
 // this can be (re)set through the command line
-int repair      = 1;      
+double repair      = 1;      
 
 
 const double K        = 0.001;   // parameter K controlling increase in mortality with damage level
@@ -158,7 +158,7 @@ void Damage()
   {
     for (h=0;h<=maxH;h++)
     {
-      dnew[d][h] = max(0.0,min(double(maxD),double(d) + hslope*(hmin-(double(h)/double(maxH)))*(hmin-(double(h)/double(maxH))) - double(repair)));
+      dnew[d][h] = max(0.0,min(double(maxD),double(d) + hslope*(hmin-(double(h)/double(maxH)))*(hmin-(double(h)/double(maxH))) - repair));
     }
   }
 }
@@ -385,6 +385,8 @@ void fwdCalc()
   outfile << std::fixed << pArrive;
   outfile << "K";
   outfile << std::fixed << K;
+outfile << "r";
+outfile << std::fixed << repair;
   outfile << ".txt";
   string fwdCalcfilename = outfile.str();
   fwdCalcfile.open(fwdCalcfilename.c_str());
@@ -426,6 +428,8 @@ void SimAttacks()
   outfile << std::fixed << pArrive;
   outfile << "K";
   outfile << std::fixed << K;
+    outfile << "r";
+    outfile << std::fixed << repair;
   outfile << ".txt";
   string attsimfilename = outfile.str();
   attsimfile.open(attsimfilename.c_str());
@@ -557,7 +561,7 @@ int main(int argc, char **argv)
 {
     double autocorr = atof(argv[1]);
     double risk = atof(argv[2]);
-    repair = atoi(argv[3]);
+    repair = atof(argv[3]);
 
         pLeave = (1.0 - autocorr)/(1.0+(risk/(1.0-risk)));
         pArrive = 1.0 - pLeave - autocorr;
@@ -572,6 +576,8 @@ int main(int argc, char **argv)
 		outfile << std::fixed << pArrive;
 		outfile << "K";
 		outfile << std::fixed << K;
+		outfile << "r";
+		outfile << std::fixed << repair;
 		outfile << ".txt";
 		string outputfilename = outfile.str();
 		outputfile.open(outputfilename.c_str());

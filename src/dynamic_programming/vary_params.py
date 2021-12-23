@@ -29,6 +29,7 @@ alpha = 1.0
 
 
 repair = [0.0,1.0]
+#repair = np.linspace(start=0,stop=10,num=50)
 
 #exe = "stress_damage_lh.exe"
 exe = "stress_damage.exe"
