@@ -3,8 +3,10 @@ import numpy as np
 import os.path, sys
 
 # specify values of the autocorrelation and risk
+<<<<<<< HEAD
 autocorr = [ 0, 0.1, 0.3, 0.5  ]
-risk = [ 0.3,0.4,0.6,0.7,0.8 ]
+risk = [ 0.05, 0.1, 0.2 ]
+
 
 # translate those in probabilities
 # of leaving and arriving
@@ -25,7 +27,8 @@ pAttack = [0.5]
 alpha = 1.0
 
 
-repair = np.linspace(start=0,stop=10,num=50)
+repair = [0.0,1.0]
+#repair = np.linspace(start=0,stop=10,num=50)
 
 #exe = "stress_damage_lh.exe"
 exe = "stress_damage.exe"
@@ -40,15 +43,21 @@ ctr = 1
 
 full_exe_name = os.path.join(the_dir,exe)
 
+nrep = 3
+
 # standard exe
 if "lh" not in exe:
     for autocorr_i in autocorr:
         for risk_i in risk:
             for repair_i in repair:
-                print(f"{full_exe_name} {autocorr_i} "
-                        + f"{risk_i} {repair_i}")
+                for rep_i in range(0,nrep):
+                    print(
+                            f"{full_exe_name} {autocorr_i} "
+                            + f"{risk_i} {repair_i} "
+                            + f"{rep_i} "
+                            )
 
-                ctr+=1
+                    ctr+=1
     sys.exit(1)
 
 

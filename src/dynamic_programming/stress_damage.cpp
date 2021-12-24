@@ -34,8 +34,8 @@
 
 using namespace std;
 
-const int seed        = time(0); // pseudo-random seed
-//const int seed      = << enter seed here >>;
+random_device rd;
+unsigned seed = rd();
 
 double pLeave;   // probability that predator leaves
 double pArrive;  // probability that predator arrives
@@ -50,7 +50,7 @@ const double hslope   = 20.0;     // slope parameter controlling increase in dam
 // damage units removed per time step
 // this can be (re)set through the command line
 double repair      = 1;      
-
+int replicate = 1;
 
 const double K        = 0.001;   // parameter K controlling increase in mortality with damage level
 const int maxD        = (1.0-mu0)/K; // maximum damage level
@@ -387,6 +387,8 @@ void fwdCalc()
   outfile << std::fixed << K;
 outfile << "r";
 outfile << std::fixed << repair;
+outfile << "rep";
+outfile << std::fixed << replicate;
   outfile << ".txt";
   string fwdCalcfilename = outfile.str();
   fwdCalcfile.open(fwdCalcfilename.c_str());
@@ -430,6 +432,8 @@ void SimAttacks()
   outfile << std::fixed << K;
     outfile << "r";
     outfile << std::fixed << repair;
+    outfile << "rep";
+    outfile << std::fixed << replicate;
   outfile << ".txt";
   string attsimfilename = outfile.str();
   attsimfile.open(attsimfilename.c_str());
@@ -562,6 +566,7 @@ int main(int argc, char **argv)
     double autocorr = atof(argv[1]);
     double risk = atof(argv[2]);
     repair = atof(argv[3]);
+    replicate = atoi(argv[4]);
 
         pLeave = (1.0 - autocorr)/(1.0+(risk/(1.0-risk)));
         pArrive = 1.0 - pLeave - autocorr;
@@ -578,6 +583,8 @@ int main(int argc, char **argv)
 		outfile << std::fixed << K;
 		outfile << "r";
 		outfile << std::fixed << repair;
+        outfile << "rep";
+        outfile << std::fixed << replicate;
 		outfile << ".txt";
 		string outputfilename = outfile.str();
 		outputfile.open(outputfilename.c_str());
