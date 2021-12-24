@@ -128,6 +128,7 @@ read.attack.file <- function(filename)
         }
     } # end for line_i
 
+    
     # read in the acute stress data
     data.acute <- read_table(
             file = filename
