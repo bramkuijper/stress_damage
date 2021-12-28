@@ -53,6 +53,33 @@ read.parameters <- function(filename)
 } # end read.parameters()
 
 
+#' Gets summary mortality statistics
+#' from the fwdCalc file
+read.fwdcalc <- function(filename)
+{
+    f = readLines(filename)
+
+    death.data <- read_table(
+            file=filename
+            ,col_names=F
+            ,n_max=3
+            ,skip=0)
+
+    # tranpose the fwdcalc data, doing this with t()
+    # is a nightmare. Rather use the values to fill a matrix
+    # and then give the columns names later
+    death.data.t = as.data.frame(matrix(death.data$X2,nrow=1))
+
+    # give the parameter data set corresponding column names
+    # also remove the handy colons from the column names
+    names(death.data.t) <- gsub(
+            pattern="\\/i:",
+            ,replacement=""
+            ,x=death.data$X1)
+
+    return(death.data.t)
+} # end read.fwdCalc
+
 #' Puts the stressLXXXX data file
 #' in a data frame
 read.stress.file <- function(filename)
