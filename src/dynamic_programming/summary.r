@@ -27,6 +27,13 @@ for (filename_i in all.files)
             ,x=filename_i)
 
     data.attack <- read.attack.file(attack.file.name)
+    
+    fwdcalc.file.name <- gsub(
+            pattern="stress"
+            ,replacement="fwdCalc"
+            ,x=filename_i)
+    
+    fwdcalc.data <- read.fwdcalc(fwdcalc.file.name)
 
     # maximum hormone after stressor: chronic
     max.h <- data.attack[
@@ -57,6 +64,8 @@ for (filename_i in all.files)
     params["h_max_a"] <- max.h.a
     params["h_base_a"] <- h.base.a
     params["file"] <- filename_i
+
+    params <- cbind(params,fwdcalc.data)
 
     summary.data <- rbind(summary.data,params)
 }

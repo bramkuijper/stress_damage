@@ -57,13 +57,20 @@ stress.summary$autocorrelation <- with(stress.summary,
 
 autocorr.list <- c(0.3,0.7)
 
-for (autocorr.i in autocorr.list)
+y.pos.ind.label <- c(4,8)
+y.pos.ind.label.row.1 <- c(0.8,0.95)
+for (autocorr.idx in 1:length(autocorr.list))
 {
+    autocorr.i <- autocorr.list[[autocorr.idx]]
+
     stress.summary.sub <- filter(stress.summary, 
             risk == 0.05 & abs(autocorrelation - autocorr.i) < 0.01) 
 
     stopifnot(nrow(stress.summary.sub) > 0)
-    readline(prompt=paste0("There are ",nrow(stress.summary.sub)," simulations here, OK? [Enter]"))
+    readline(prompt=paste0(
+                    "There are "
+                    ,nrow(stress.summary.sub)
+                    ," simulations here, OK? [Enter]"))
 
     # the two repair values we want to plot
     repair.vals <- c(0,1)
@@ -107,37 +114,60 @@ for (autocorr.i in autocorr.list)
             mean_damage_scaled = mean_damage / max(hormone_time_data$mean_damage)
         )
 
+    labels.row.1 <- data.frame(
+            repair_text = sort(unique(hormone_time_data$repair_text))
+            ,label = LETTERS[1:2]
+            ,x=2
+            ,y=y.pos.ind.label.row.1[[autocorr.idx]])
+
     p1 <- hormone_time_data %>% 
         ggplot(mapping=aes(x=time)) +
         geom_line(mapping=aes(y=mean_hormone)) +
         facet_grid(.~ repair_text) +
+        geom_text(
+                data=labels.row.1
+                ,mapping=aes(x=x,y=y,label=label)
+        ) +
         theme_classic() +
         theme(
             strip.background = element_rect(
                 color="transparent"
             )
+            ,panel.spacing = unit(1,"lines")
         ) +
         ylab("Mean hormone") +
         xlab("") 
+
+    labels.row.2 <- data.frame(
+            repair_text = sort(unique(hormone_time_data$repair_text))
+            ,label = LETTERS[3:4]
+            ,x=2
+            ,y=y.pos.ind.label[[autocorr.idx]]
+            )
 
     p2 <- hormone_time_data %>% 
         ggplot(mapping=aes(x=time)) +
         geom_line(mapping=aes(y=mean_damage)) +
         facet_grid(.~ repair_text) +
         theme_classic() +
+        geom_text(
+                data=labels.row.2
+                ,mapping=aes(x=x,y=y,label=label)
+        ) +
         theme(
             strip.background = element_rect(
                 color="transparent"
-            ),
-            strip.text.x = element_text(color="transparent")
+            )
+            ,strip.text.x = element_text(color="transparent")
+            ,panel.spacing = unit(1,"lines")
         ) +
         ylab("Mean damage") +
         xlab("Time")
 
     (p1/p2)
 
-    ggsave(filename=paste0("hormone_profile_autocorr",autocorr.i,".pdf")
-           ,device=cairo_pdf
+    ggsave(filename=paste0("hormone_profile_autocorr",autocorr.i,".png")
+            #           ,device=cairo_png
            ,height=6
            ,width=5)
 } # end autocorr.i
