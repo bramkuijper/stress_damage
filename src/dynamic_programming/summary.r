@@ -15,8 +15,10 @@ all.files <- list.files(path="."
 
 summary.data <- NULL
 
-for (filename_i in all.files)
+for (filename_idx in 1:length(all.files))
 {
+    filename_i <- all.files[[filename_idx]]
+
     print("filename:")
     print(filename_i)
     params <- read.parameters(filename_i)
