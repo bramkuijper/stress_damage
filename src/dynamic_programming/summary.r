@@ -27,7 +27,8 @@ for (filename_i in all.files)
             ,x=filename_i)
 
     data.attack <- read.attack.file(attack.file.name)
-    
+   
+    # get the fwd calc data 
     fwdcalc.file.name <- gsub(
             pattern="stress"
             ,replacement="fwdCalc"
@@ -59,12 +60,17 @@ for (filename_i in all.files)
                     & data.attack$type == "acute"
                     ,"hormone"]
 
+    # maximum damage level
+    max.damage <- max(data.attack$damage)
+
     params["h_max_c"] <- max.h
     params["h_base_c"] <- h.base
     params["h_max_a"] <- max.h.a
     params["h_base_a"] <- h.base.a
+    params["max_damage"] <- max.damage
     params["file"] <- filename_i
 
+    # add fwdcalc data
     params <- cbind(params,fwdcalc.data)
 
     summary.data <- rbind(summary.data,params)
