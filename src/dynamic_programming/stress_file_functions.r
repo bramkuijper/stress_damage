@@ -63,7 +63,7 @@ read.fwdcalc <- function(filename)
             file=filename
             ,col_names=F
             ,n_max=3
-            ,skip=0)
+            ,skip=1)
 
     # tranpose the fwdcalc data, doing this with t()
     # is a nightmare. Rather use the values to fill a matrix
