@@ -12,9 +12,8 @@ data.death.comps[,"risk"] <- with(data.death.comps
                              
 # calculate autocorrelation
 data.death.comps[,"autocorrelation"] <- with(data.death.comps
-                                     ,round(1.0 - pArrive - pLeave
-                                       ,digits=2))
-
+                                            ,round(1.0 - pArrive - pLeave
+                                            ,digits=2))
 
 # autocorrelation values used in this plot
 autocorr.u <- c(0,0.3,0.9)
@@ -35,6 +34,27 @@ data.death.comps.f$autocorr.text <- with(
   ,paste("Autocorrelation: ",autocorrelation)
 )
 
+data.death.comps.f$damage.death.predict <- NA
+
+data.death.comps.f <- arrange(data.death.comps.f, repair)
+
+for (risk.u.i in risk.u)
+{
+    for (autocorr.u.i in autocorr.u)
+    {
+        # some loess smoothing
+        loess.dam.death <- loess(damageDeaths ~ repair
+                ,data=data.death.comps.f[data.death.comps.f$risk == risk.u.i & 
+                        data.death.comps.f$autocorrelation == autocorr.u.i,]
+                        ,span=0.5)
+
+        data.death.comps.f[
+            data.death.comps.f$risk == risk.u.i & 
+                data.death.comps.f$autocorrelation == autocorr.u.i,
+                "damage.death.predict"] <- predict(loess.dam.death)
+    }
+}
+
 # labels for the first row
 labels.row.1 <- data.frame(
         label=LETTERS[1:length(autocorr.u)]
@@ -43,15 +63,15 @@ labels.row.1 <- data.frame(
         ,y=rep(0.2,times=length(autocorr.u))
         )
 
-p_death <- ggplot(mapping=aes(x=repair, y=damageDeaths)
+p_death <- ggplot(mapping=aes(x=repair, y=damage.death.predict)
              ,data=data.death.comps.f) +
   geom_line(mapping=aes(colour=risk_cat)) +
   facet_grid(. ~autocorr.text) +
   theme_classic() +
-  geom_text(
-          data = labels.row.1
-          ,mapping = aes(x=x, y=y, label=label)
-          ) +
+  #  geom_text(
+  #          data = labels.row.1
+  #          ,mapping = aes(x=x, y=y, label=label)
+  #          ) +
   xlab("Repair") +
     theme(
         strip.background = element_rect(
@@ -59,7 +79,8 @@ p_death <- ggplot(mapping=aes(x=repair, y=damageDeaths)
         )
     ,panel.spacing = unit(1,"lines")
     ) +
-  ylab("Death due to stressor") +
+  ylab("Death due to damage") +
+  ylim(c(0.0,1e-04))
   labs(colour="Risk")
 
 plot.name = "mortality_components"
