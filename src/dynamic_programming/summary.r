@@ -63,16 +63,20 @@ for (filename_idx in 1:length(all.files))
                     ,"hormone"]
 
     # maximum damage level
-    max.damage <- data.attack[
-                    data.attack$time == 45
+    max.damage.a <- max(data.attack[
                     & data.attack$type == "acute"
-                    ,"damage"]
+                    ,"damage"])
+    
+    max.damage.c <- max(data.attack[
+                    & data.attack$type == "chronic"
+                    ,"damage"])
 
     params["h_max_c"] <- max.h
     params["h_base_c"] <- h.base
     params["h_max_a"] <- max.h.a
     params["h_base_a"] <- h.base.a
-    params["max_damage"] <- max.damage
+    params["max_damage_a"] <- max.damage.a
+    params["max_damage_c"] <- max.damage.c
     params["file"] <- filename_i
 
     # add fwdcalc data
