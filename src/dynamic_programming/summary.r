@@ -63,7 +63,10 @@ for (filename_idx in 1:length(all.files))
                     ,"hormone"]
 
     # maximum damage level
-    max.damage <- max(data.attack$damage)
+    max.damage <- data.attack[
+                    data.attack$time == 45
+                    & data.attack$type == "acute"
+                    ,"damage"]
 
     params["h_max_c"] <- max.h
     params["h_base_c"] <- h.base
