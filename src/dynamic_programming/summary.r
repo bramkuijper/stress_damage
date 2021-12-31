@@ -9,7 +9,7 @@ script.dir <- here()
 source(file.path(script.dir,"src/dynamic_programming/stress_file_functions.r"))
 # obtain a list of all files
 all.files <- list.files(path="."
-        ,recursive=T
+        ,recursive=F
         ,pattern="^stressL.*K\\d.*\\.txt")
 
 
@@ -18,6 +18,11 @@ summary.data <- NULL
 for (filename_idx in 1:length(all.files))
 {
     filename_i <- all.files[[filename_idx]]
+
+    #    if (filename_idx > 10)
+    #    {
+    #        break;
+    #    }
 
     print("filename:")
     print(filename_i)
