@@ -8,9 +8,12 @@ suppressPackageStartupMessages(library("readr"))
 suppressPackageStartupMessages(library("filesstrings"))
 suppressPackageStartupMessages(library("tidyverse"))
 suppressPackageStartupMessages(library("viridis"))
+suppressPackageStartupMessages(library("here"))
 
-# some general functions
-source("stress_file_functions.r")
+# load file with general functions
+script.dir <- here()
+source(file.path(script.dir,
+                "src/dynamic_programming/stress_file_functions.r"))
 
 
 #### WORK OUT THE FILENAMES ####
@@ -55,19 +58,23 @@ data.attack.chronic <- filter(data.attack, type == "chronic")
 # first plot: hormone
 p1 <- ggplot(data.attack.acute) +
         geom_line(aes(y=hormone, x=time)) +
+        theme_classic() +
         ggtitle("Acute stress")
 
 # second plot: hormone
 p2 <- ggplot(data.attack.acute) +
+        theme_classic() +
         geom_line(aes(y=damage, x=time))
 
 # first plot: hormone
 p3 <- ggplot(data.attack.chronic) +
         geom_line(aes(y=hormone, x=time)) +
+        theme_classic() +
         ggtitle("Chronic stress")
 
 # second plot: hormone
 p4 <- ggplot(data.attack.chronic) +
+        theme_classic() +
         geom_line(aes(y=damage, x=time))
 
 
@@ -77,15 +84,17 @@ p4 <- ggplot(data.attack.chronic) +
         #test.u$hormone <- rnorm(n=nrow(test.u))
         #print(nrow(test.u))
 
+print(sort(unique(data.strategy$t)))
 
 # now a levelplot showing the stress levels
 p5 <- ggplot(data=data.strategy) +
         geom_tile(aes(x = t, y = d, fill = hormone)) +
-        scale_x_continuous(limits = c(0,50), expand=c(0,0)) +
+        scale_x_continuous(limits = c(-0.5,50.5), expand=c(0,0)) +
         scale_y_continuous(limits = c(0,1000), expand=c(0,0)) +
-        scale_fill_viridis() +
+        scale_fill_viridis(option="magma") +
+        xlab("Time since last attack, tau") +
+        theme_classic() +
         ggtitle("Hormone strategy over tau and damage") 
-
 
 # make annotation
 param.str <- paste0(
@@ -95,6 +104,7 @@ param.str <- paste0(
         " K: ",params["K"])
 
 (p1 / p2 / p3 / p4 / p5) +
-    plot_annotation(param.str)
+    plot_annotation(param.str) +
+    plot_layout(heights = unit(c(rep(1,times=4),8),rep("null",times=5)))
 
-ggsave(filename=plot.file.name)
+ggsave(filename=plot.file.name,height=12)
