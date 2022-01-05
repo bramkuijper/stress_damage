@@ -3,10 +3,12 @@ import numpy as np
 import os.path, sys
 
 # specify values of the autocorrelation and risk
-#autocorr = [ 0,0.3,0.7,0.9 ]
 
-autocorr = np.linspace(start=0,stop=0.9,num=50)
-risk = [ 0.02,0.05,0.1,0.2,0.3,0.5 ]
+#autocorr = np.linspace(start=0,stop=0.9,num=50)
+#risk = [ 0.02,0.05,0.1,0.2,0.3,0.5 ]
+
+autocorr = [ 0,0.3,0.9 ]
+risk = [ 0.02,0.05,0.1 ]
 
 
 # translate those in probabilities
@@ -28,8 +30,7 @@ pAttack = [0.5]
 alpha = 1.0
 
 
-repair = [0.0,1.0]
-#repair = np.linspace(start=0,stop=10,num=50)
+repair = [0.0,1.0,5.0,10.0]
 
 #exe = "stress_damage_lh.exe"
 exe = "stress_damage.exe"
@@ -44,7 +45,7 @@ ctr = 1
 
 full_exe_name = os.path.join(the_dir,exe)
 
-nrep = 5
+nrep = 1
 
 # standard exe
 if "lh" not in exe:

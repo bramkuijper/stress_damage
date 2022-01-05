@@ -17,7 +17,8 @@ data.repair[,"risk"] <- with(data.repair
 # calculate autocorrelation
 data.repair[,"autocorrelation"] <- with(data.repair
                                      ,round(1.0 - pArrive - pLeave
-                                       ,digits=2))
+                                       ,digits=2)
+                               )
 
 # autocorrelation values used in this plot
 autocorr.u <- c(0,0.3,0.9)
@@ -54,7 +55,7 @@ data.repair.f$autocorr.text <- with(
   ,paste("Autocorrelation: ",autocorrelation)
 )
 
-data.repair.f$max_damage <- data.repair.f$max_damage / 1000
+data.repair.f$max_damage <- data.repair.f$max_damage_a
 
 # labels for the first row
 labels.row.1 <- data.frame(
@@ -68,7 +69,7 @@ labels.row.2 <- data.frame(
         label=LETTERS[(length(autocorr.u)+1):(2*length(autocorr.u))]
         ,autocorr.text=factor(sort(unique(data.repair.f$autocorr.text)))
         ,x=rep(1,times=length(autocorr.u))
-        ,y=rep(0.75,times=length(autocorr.u))
+        ,y=rep(15.0,times=length(autocorr.u))
         )
 
 labels.row.3 <- data.frame(
@@ -152,6 +153,7 @@ p_damage <- ggplot(mapping=aes(x=repair, y=max_damage)
         ,panel.spacing = unit(1,"lines")
     ) +
   ylab("Maximum damage") +
+  ylim(0,15.0) +
   labs(colour="Risk")
 
 (p_baseline/p_damage)

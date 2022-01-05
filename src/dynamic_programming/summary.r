@@ -69,11 +69,12 @@ for (filename_idx in 1:length(all.files))
 
     # maximum damage level
     max.damage.a <- max(data.attack[
-                    & data.attack$type == "acute"
+                    data.attack$type == "acute"
                     ,"damage"])
     
     max.damage.c <- max(data.attack[
-                    & data.attack$type == "chronic"
+                    data.attack$time <= 50 &
+                    data.attack$type == "chronic"
                     ,"damage"])
 
     params["h_max_c"] <- max.h
