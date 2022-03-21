@@ -54,13 +54,15 @@ if "lh" not in exe:
         for risk_i in risk:
             for repair_i in repair:
                 for rep_i in range(0,nrep):
-                    print(
-                            f"{full_exe_name} {autocorr_i} "
-                            + f"{risk_i} {repair_i} "
-                            + f"{rep_i} "
-                            )
+                    for pattack_i in pAttack:
+                        print(
+                                f"{full_exe_name} {autocorr_i} "
+                                + f"{risk_i} {repair_i} "
+                                + f"{rep_i} "
+                                + f"{pattack_i} "
+                                )
 
-                    ctr+=1
+                        ctr+=1
     sys.exit(1)
 
 
