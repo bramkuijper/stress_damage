@@ -39,7 +39,7 @@ unsigned seed = rd();
 
 double pLeave;   // probability that predator leaves
 double pArrive;  // probability that predator arrives
-const double pAttack  = 0.5;     // probability that predator attacks if present
+double pAttack  = 0.5;     // probability that predator attacks if present
 const double alpha    = 1.0;     // parameter controlling effect of hormone level on pKilled
 //const double beta     = 1.5;     // parameter controlling effect of hormone level on reproductive rate
 const double mu0      = 0.002;   // background mortality (independent of hormone level and predation risk)
@@ -567,6 +567,7 @@ int main(int argc, char **argv)
     double risk = atof(argv[2]);
     repair = atof(argv[3]);
     replicate = atoi(argv[4]);
+    pAttack = atoi(argv[4]);
 
         pLeave = (1.0 - autocorr)/(1.0+(risk/(1.0-risk)));
         pArrive = 1.0 - pLeave - autocorr;
@@ -583,6 +584,8 @@ int main(int argc, char **argv)
 		outfile << std::fixed << K;
 		outfile << "r";
 		outfile << std::fixed << repair;
+		outfile << "pAtt";
+		outfile << std::fixed << pAttack;
         outfile << "rep";
         outfile << std::fixed << replicate;
 		outfile << ".txt";
