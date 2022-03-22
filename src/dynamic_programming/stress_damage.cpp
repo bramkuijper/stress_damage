@@ -559,7 +559,7 @@ int main(int argc, char **argv)
     double risk = atof(argv[2]);
     repair = atof(argv[3]);
     replicate = atoi(argv[4]);
-    pAttack = atoi(argv[5]);
+    pAttack = atof(argv[5]);
 
         pLeave = (1.0 - autocorr)/(1.0+(risk/(1.0-risk)));
         pArrive = 1.0 - pLeave - autocorr;
