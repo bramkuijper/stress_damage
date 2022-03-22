@@ -62,7 +62,7 @@ const int skip        = 10;      // interval between print-outs
 ofstream outputfile;  // output file
 ofstream fwdCalcfile; // forward calculation output file
 ofstream attsimfile;  // simulated attacks output file
-stringstream outfile; // for naming output file
+stringstream outfile; // for naming output files
 
 // random numbers
 mt19937 mt(seed); // random number generator
@@ -294,7 +294,7 @@ void PrintParams()
 
 
 /* FORWARD CALCULATION TO OBTAIN PER-TIME-STEP MORTALITY FROM STRESSOR VS. DAMAGE */
-void fwdCalc()
+void fwdCalc(const string &base_name)
 {
   int t,d,h,d1,d2,h1,h2,i,age;
   double ddec = 0.0;
@@ -377,20 +377,8 @@ void fwdCalc()
 
   }
 
-  ///////////////////////////////////////////////////////
-  outfile.str("");
-  outfile << "fwdCalcL";
-  outfile << std::fixed << pLeave;
-  outfile << "A";
-  outfile << std::fixed << pArrive;
-  outfile << "K";
-  outfile << std::fixed << K;
-outfile << "r";
-outfile << std::fixed << repair;
-outfile << "rep";
-outfile << std::fixed << replicate;
-  outfile << ".txt";
-  string fwdCalcfilename = outfile.str();
+  string fwdCalcfilename = "fwdCalc" + base_name + ".txt";
+//  fwdCalcfilename += ".txt";
   fwdCalcfile.open(fwdCalcfilename.c_str());
   ///////////////////////////////////////////////////////
 
@@ -408,12 +396,12 @@ outfile << std::fixed << replicate;
     }
 
   fwdCalcfile.close();
-}
+} // end fWdcalc
 
 
 
 /* Simulated series of attacks */
-void SimAttacks()
+void SimAttacks(const string &base_name)
 {
   int i,time,t,d,h,d1,d2;
   const int nInd = 100;
@@ -423,19 +411,23 @@ void SimAttacks()
     meanD[100+1],varD[100+1],meanH[100+1],varH[100+1]; // arrays for stats, from time step 0 to 100
 
   ///////////////////////////////////////////////////////
-  outfile.str("");
-  outfile << "simAttacksL";
-  outfile << std::fixed << pLeave;
-  outfile << "A";
-  outfile << std::fixed << pArrive;
-  outfile << "K";
-  outfile << std::fixed << K;
-    outfile << "r";
-    outfile << std::fixed << repair;
-    outfile << "rep";
-    outfile << std::fixed << replicate;
-  outfile << ".txt";
-  string attsimfilename = outfile.str();
+//  outfile.str("");
+//  outfile << "simAttacksL";
+//  outfile << std::fixed << pLeave;
+//  outfile << "A";
+//  outfile << std::fixed << pArrive;
+//  outfile << "K";
+//  outfile << std::fixed << K;
+//    outfile << "r";
+//    outfile << std::fixed << repair;
+//    outfile << "rep";
+//    outfile << std::fixed << replicate;
+//  outfile << ".txt";
+
+
+  string attsimfilename = "simAttacks" + base_name;
+    attsimfilename += ".txt";
+
   attsimfile.open(attsimfilename.c_str());
   ///////////////////////////////////////////////////////
 
@@ -573,10 +565,11 @@ int main(int argc, char **argv)
         pArrive = 1.0 - pLeave - autocorr;
 //    pLeave= 0.095;
 //    pArrive = 0.005;
+//
 
 		///////////////////////////////////////////////////////
 		outfile.str("");
-		outfile << "stressL";
+		outfile << "L";
 		outfile << std::fixed << pLeave;
 		outfile << "A";
 		outfile << std::fixed << pArrive;
@@ -588,8 +581,12 @@ int main(int argc, char **argv)
 		outfile << std::fixed << pAttack;
         outfile << "rep";
         outfile << std::fixed << replicate;
-		outfile << ".txt";
-		string outputfilename = outfile.str();
+
+        string base_name = outfile.str();
+
+		string outputfilename = "stress" + base_name;
+        outputfilename += ".txt";
+
 		outputfile.open(outputfilename.c_str());
 		///////////////////////////////////////////////////////
 
@@ -624,8 +621,8 @@ int main(int argc, char **argv)
         PrintParams();
         outputfile.close();
 
-        fwdCalc();
-        SimAttacks();
+        fwdCalc(base_name);
+        SimAttacks(base_name);
 
   return 0;
 }

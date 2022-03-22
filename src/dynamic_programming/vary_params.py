@@ -25,7 +25,7 @@ for autocorr_i in autocorr:
 Kfec = [ 0.01 ]
 Kmort = [ 0.001 ]
 
-pAttack = [1.0]
+pAttack = [0.25,0.75,1.0]
 
 alpha = 1.0
 
