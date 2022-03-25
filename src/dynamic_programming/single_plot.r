@@ -101,6 +101,7 @@ param.str <- paste0(
         "pLeave: ",params["pLeave"],",",
         " pArrive: ",params["pArrive"],",",
         " repair: ",params["repair"],",",
+        " pAtt: ",params["pAttack"],",",
         " K: ",params["K"])
 
 (p1 / p2 / p3 / p4 / p5) +

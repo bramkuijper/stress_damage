@@ -3,7 +3,8 @@ library("tidyverse")
 library("patchwork")
 library("here")
 
-# get general stress functionality script
+# get general stress functionality script which is in another directory
+# as I need it there for plotting of simulations
 proj.dir <- here()
 stress_functions_file <- file.path(
               proj.dir

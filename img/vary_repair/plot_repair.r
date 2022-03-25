@@ -1,6 +1,7 @@
 library("ggplot2")
 library("patchwork")
 library("tidyverse")
+library("ggthemes")
 
 type="png"
 
@@ -99,6 +100,7 @@ p_baseline <- ggplot(mapping=aes(x=repair, y=hormone_level)
              ,data=data.repair.recast) +
   geom_line(mapping=aes(colour=risk_cat,linetype=hormone_type_txt),size=0.4) +
   facet_grid(. ~autocorr.text) +
+  scale_color_ptol() +
   theme_classic() +
   geom_text(
           data = labels.row.1
@@ -139,7 +141,8 @@ p_baseline <- ggplot(mapping=aes(x=repair, y=hormone_level)
 # various amounts of repair
 p_damage <- ggplot(mapping=aes(x=repair, y=max_damage)
        ,data=data.repair.f) +
-  geom_line(mapping=aes(colour=risk_cat)) +
+  geom_line(mapping=aes(color=risk_cat)) +
+  scale_color_ptol() +
   facet_grid(. ~autocorr.text) +
   theme_classic() +
   geom_text(
