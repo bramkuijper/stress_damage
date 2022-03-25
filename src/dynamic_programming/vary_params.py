@@ -7,7 +7,7 @@ import os.path, sys
 #autocorr = np.linspace(start=0,stop=0.9,num=50)
 #risk = [ 0.02,0.05,0.1,0.2,0.3,0.5 ]
 
-autocorr = [ 0.7 ]
+autocorr = [ 0,0.3,0.9 ]
 risk = [ 0.02,0.05,0.1 ]
 
 
