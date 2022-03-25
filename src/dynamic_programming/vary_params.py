@@ -7,8 +7,8 @@ import os.path, sys
 #autocorr = np.linspace(start=0,stop=0.9,num=50)
 #risk = [ 0.02,0.05,0.1,0.2,0.3,0.5 ]
 
-autocorr = [ 0,0.3,0.9 ]
-risk = [ 0.02,0.05,0.1 ]
+autocorr = [ 0.7,0.9 ]
+risk = [ 0.05 ]
 
 
 # translate those in probabilities
@@ -23,15 +23,15 @@ for autocorr_i in autocorr:
         pLA += [[round(pL,4),round(pA,4)]]
 
 Kfec = [ 0.01 ]
-Kmort = [ 0.001 ]
+Kmort = [ 0.002 ]
 
 pAttack = [0.25,0.75,1.0]
 
 alpha = 1.0
 
 
-#repair = [0.0,1.0,5.0,10.0]
-repair = np.linspace(start=0,stop=10,num=50)
+repair = [0.0,1.0]
+#repair = np.linspace(start=0,stop=10,num=50)
 
 #exe = "stress_damage_lh.exe"
 exe = "stress_damage.exe"

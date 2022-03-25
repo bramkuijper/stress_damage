@@ -9,7 +9,7 @@ script.dir <- here()
 source(file.path(script.dir,"src/dynamic_programming/stress_file_functions.r"))
 # obtain a list of all files
 all.files <- list.files(path="."
-        ,recursive=F
+        ,recursive=T
         ,pattern="^stressL.*K\\d.*\\.txt")
 
 
