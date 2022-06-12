@@ -1,6 +1,7 @@
 library("ggplot2")
 library("tidyverse")
 library("patchwork")
+library("ggtext")
 library("here")
 
 # get general stress functionality script which is in another directory
@@ -56,22 +57,24 @@ stress.summary$risk <- with(stress.summary,
 stress.summary$autocorrelation <- with(stress.summary,
         1.0 - pArrive - pLeave)
 
-autocorr.list <- c(0.3,0.7)
+autocorr.list <- c(0,0.3,0.7,0.9)
 
-y.pos.ind.label <- c(4,8)
-y.pos.ind.label.row.1 <- c(0.8,0.95)
+y.pos.ind.label <- c(8,8,8,8)
+
+y.pos.ind.label.row.1 <- rep(0.8,times=4)
+
 for (autocorr.idx in 1:length(autocorr.list))
 {
     autocorr.i <- autocorr.list[[autocorr.idx]]
 
     stress.summary.sub <- filter(stress.summary, 
-            risk == 0.05 & abs(autocorrelation - autocorr.i) < 0.01) 
+            abs(risk - 0.05) < 0.01 & abs(autocorrelation - autocorr.i) < 0.01) 
 
     stopifnot(nrow(stress.summary.sub) > 0)
-    readline(prompt=paste0(
-                    "There are "
-                    ,nrow(stress.summary.sub)
-                    ," simulations here, OK? [Enter]"))
+    #    readline(prompt=paste0(
+    #                    "There are "
+    #                    ,nrow(stress.summary.sub)
+    #                    ," simulations here, OK? [Enter]"))
 
     # the two repair values we want to plot
     repair.vals <- c(0,1)
@@ -119,25 +122,64 @@ for (autocorr.idx in 1:length(autocorr.list))
             repair_text = sort(unique(hormone_time_data$repair_text))
             ,label = LETTERS[1:2]
             ,x=2
-            ,y=y.pos.ind.label.row.1[[autocorr.idx]])
+            ,y=y.pos.ind.label.row.1[[autocorr.idx]]
+            )
+
+
+    labels.hopt <- data.frame(
+            repair_text = sort(unique(hormone_time_data$repair_text))
+            ,label = c("*h*<sub>θ</sub>","*h*<sub>θ</sub>")
+            ,y=0.29
+            ,x=c(0,0)
+            )
+
+    labels.stressor <- data.frame(
+            repair_text = sort(unique(hormone_time_data$repair_text))
+            ,label = c("Stressor","Stressor")
+            ,y=c(0.7,0.4)
+            ,x=c(8.5,8.5)
+            )
 
     p1 <- hormone_time_data %>% 
-        ggplot(mapping=aes(x=time)) +
+        ggplot(mapping=aes(x=time+1)) +
         geom_line(mapping=aes(y=mean_hormone)) +
         facet_grid(.~ repair_text) +
         geom_text(
                 data=labels.row.1
                 ,mapping=aes(x=x,y=y,label=label)
         ) +
+        geom_text(
+                data=labels.stressor
+                ,mapping=aes(x=x,y=y,label=label)
+                ,angle=90
+                ,colour="darkred"
+                ,size=2.3
+        ) +
+        geom_hline(yintercept=0.3,linetype="dashed",size=0.25,colour="darkgrey") +
+        geom_richtext(
+                data=labels.hopt
+                ,mapping=aes(x=x,y=y,label=label)
+                ,fill="white"
+                ,label.color=NA
+                ,size=3
+                ,colour="darkgrey"
+                ,label.padding=grid::unit(rep(0.01,4),"pt")
+        ) +
         theme_classic() +
+        labs(
+            y = "Mean hormone",
+            x = ""
+        ) +
         theme(
             strip.background = element_rect(
                 color="transparent"
             )
             ,panel.spacing = unit(1,"lines")
+            ,axis.title.y = ggtext::element_markdown()
         ) +
-        ylab("Mean hormone") +
-        xlab("") 
+        geom_vline(xintercept=10,linetype="longdash",size=0.25,colour="darkred") +
+        ylim(0.28,0.8) +
+        xlim(0,50) 
 
     labels.row.2 <- data.frame(
             repair_text = sort(unique(hormone_time_data$repair_text))
@@ -147,7 +189,7 @@ for (autocorr.idx in 1:length(autocorr.list))
             )
 
     p2 <- hormone_time_data %>% 
-        ggplot(mapping=aes(x=time)) +
+        ggplot(mapping=aes(x=time+1)) +
         geom_line(mapping=aes(y=mean_damage)) +
         facet_grid(.~ repair_text) +
         theme_classic() +
@@ -161,14 +203,18 @@ for (autocorr.idx in 1:length(autocorr.list))
             )
             ,strip.text.x = element_text(color="transparent")
             ,panel.spacing = unit(1,"lines")
+            ,axis.title.x = ggtext::element_markdown()
         ) +
         ylab("Mean damage") +
-        xlab("Time")
+        xlab("Time, *t*") +
+        geom_vline(xintercept=10,linetype="longdash",size=0.25,colour="darkred") +
+        ylim(0,4) +
+        xlim(0,50)
 
     (p1/p2)
 
-    ggsave(filename=paste0("hormone_profile_autocorr",autocorr.i,".png")
-            #           ,device=cairo_png
+    ggsave(filename=paste0("hormone_profile_autocorr",autocorr.i,".pdf")
+           ,device=cairo_pdf
            ,height=6
            ,width=5)
 } # end autocorr.i
