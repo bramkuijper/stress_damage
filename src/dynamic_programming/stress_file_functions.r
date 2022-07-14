@@ -119,6 +119,9 @@ read.stress.file <- function(filename)
     return(data)
 } # end read.stress.file
 
+
+
+
 #' Puts the simAttacks data file
 #' in a data frame. 
 #' simAttacks data is a bit problematic
@@ -155,24 +158,36 @@ read.attack.file <- function(filename)
         }
     } # end for line_i
 
+    n_max = Inf
+        
+    if (length(range.acute) == 2)
+    {
+        n_max = range.acute[[2]] - range.acute[[1]]
+    }        
     
     # read in the acute stress data
     data.acute <- read_table(
             file = filename
             ,skip = range.acute[[1]] - 1
-            ,n_max = range.acute[[2]] - range.acute[[1]]
+            ,n_max = n_max
             ,col_names=T)
 
     data.acute["type"] <- "acute"
-
-    # read in the chronic stress data
-    data.chronic <- read_table(
-            file = filename
-            ,skip = range.chronic[[1]] - 1
-            ,col_names=T)
-
-    data.chronic["type"] <- "chronic"
-
-    return(rbind(data.acute,data.chronic))
+   
+    # if there is a defined length of range acute
+    # this means that there is a date set of the chronic
+    # exposure below it
+    if (length(range.acute) == 2)
+    {
+        # read in the chronic stress data
+        data.chronic <- read_table(
+                file = filename
+                ,skip = range.chronic[[1]] - 1
+                ,col_names=T)
+    
+        data.chronic["type"] <- "chronic"
+        data.acute <- rbind(data.acute,data.chronic)
+    }
+    return(data.acute)
 } # end read.attack.file()
 

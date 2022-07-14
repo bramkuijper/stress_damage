@@ -36,21 +36,22 @@ const double phi_inv  = 1.0/((sqrt(5.0)+1.0)/2.0); // inverse of golden ratio (f
 const double hmin     = 0.3;     // level of hormone that minimises damage
 const double hslope   = 20.0;     // slope parameter controlling increase in damage with deviation from hmin
 const int maxD        = 1000;      // maximum damage level
-const int repair      = 1;      // damage units removed per time step
+int repair      = 1;      // damage units removed per time step
 double Kmort        = 0.0;    // parameter Kmort controlling increase in mortality with damage level
 double Kfec        = 0.05;    // parameter Kmort controlling increase in mortality with damage level
 const int maxI        = 1000000; // maximum number of iterations
 const int maxT        = 50;     // maximum number of time steps since last saw predator
 const int maxH        = 100;     // maximum hormone level
 const int skip        = 1;      // interval between print-outs
-const int maxTs = 6; // duration of a season
+const int maxTs = 20; // duration of a season
 
-int n_repro_bout = 1;
+int n_repro_bout_length = 1;
 
 std::ofstream outputfile;  // output file
 std::ofstream fwdCalcfile; // forward calculation output file
 std::ofstream attsimfile;  // simulated attacks output file
 std::stringstream outfile; // for naming output file
+std::string base_name = "";
 
 // random numbers
 std::mt19937 mt(seed); // random number generator
@@ -205,11 +206,10 @@ void Reproduction()
         // reproductive event
         // in the middle between 0 and maxTs
         // lasting one timestep 
-        repro[ts][d] = abs(ts % maxTs - floor(maxTs/2)) < n_repro_bout ? 
+        repro[ts][d] = abs(ts % maxTs - floor(maxTs/2)) < n_repro_bout_length ? 
             std::max(0.0, 1.0 - Kfec*double(d)) 
             : 
             0.0;
-
 
         repro[ts][maxD] = 0.0;
     }
@@ -366,7 +366,7 @@ void PrintParams()
        << "maxD: " << "\t" << maxD << std::endl
        << "maxH: " << "\t" << maxH << std::endl
        << "hmin: " << "\t" << hmin << std::endl
-       << "n_repro_bout: " << "\t" << n_repro_bout << std::endl
+       << "n_repro_bout_length: " << "\t" << n_repro_bout_length << std::endl
        << "hslope: " << "\t" << hslope << std::endl
        << "repair: " << "\t" << repair << std::endl;
 }
@@ -514,25 +514,15 @@ void fwdCalc()
 
 
 /* Simulated series of attacks */
-void SimAttacks()
+void SimAttacks(std::string const &base_name)
 {
   int i,time_i,t,d,h,d1,d2;
   double //r,
     ddec;
   bool attack;
 
-  ///////////////////////////////////////////////////////
-  outfile.str("");
-  outfile << "simAttacksL";
-  outfile << std::fixed << pLeave;
-  outfile << "A";
-  outfile << std::fixed << pArrive;
-  outfile << "Kmort";
-  outfile << std::fixed << Kmort;
-  outfile << "Kfec";
-  outfile << std::fixed << Kfec;
-  outfile << ".txt";
-  std::string attsimfilename = outfile.str();
+  std::string attsimfilename = "simAttacks" + base_name;
+    attsimfilename += ".txt";
   attsimfile.open(attsimfilename.c_str());
   ///////////////////////////////////////////////////////
 
@@ -579,7 +569,7 @@ void SimAttacks()
       d2 = ceil(dnew[d][h]);
       ddec = dnew[d][h]-d1;
 
-      reproduce = abs(ts % maxTs - floor(maxTs/2)) < n_repro_bout;
+      reproduce = abs(ts % maxTs - floor(maxTs/2)) < n_repro_bout_length;
 
       if (Uniform(mt)<ddec)
       {
@@ -609,6 +599,9 @@ void init_params(int argc, char** argv)
     alpha = atof(argv[4]);
     Kmort = atof(argv[5]);
     Kfec = atof(argv[6]);
+    repair = atoi(argv[7]);
+    n_repro_bout_length = atoi(argv[8]);
+    base_name = argv[9];
 } // end init_params() 
 
 /* MAIN PROGRAM */
@@ -617,17 +610,25 @@ int main(int argc, char** argv)
     init_params(argc, argv);
 
 		///////////////////////////////////////////////////////
-		outfile.str("");
-		outfile << "stressL";
-		outfile << std::fixed << pLeave;
-		outfile << "A";
-		outfile << std::fixed << pArrive;
-		outfile << "Kmort";
-		outfile << std::fixed << Kmort;
-		outfile << "Kfec";
-		outfile << std::fixed << Kfec;
-		outfile << ".txt";
-        std::string outputfilename = outfile.str();
+//		outfile.str("");
+//		outfile << "L";
+//		outfile << std::fixed << pLeave;
+//		outfile << "A";
+//		outfile << std::fixed << pArrive;
+//		outfile << "Kfec";
+//		outfile << std::fixed << Kfec;
+//		outfile << "Kmort";
+//		outfile << std::fixed << Kmort;
+//		outfile << "r";
+//		outfile << std::fixed << repair;
+//		outfile << "pAtt";
+//		outfile << std::fixed << pAttack;
+//		outfile << "bout";
+//		outfile << std::fixed << n_repro_bout_length;
+
+        std::string outputfilename = "stress_strategy" + base_name;
+        outputfilename += ".txt";
+
 		outputfile.open(outputfilename.c_str());
 		///////////////////////////////////////////////////////
 
@@ -666,7 +667,7 @@ int main(int argc, char** argv)
         outputfile.close();
 
 //        fwdCalc();
-        SimAttacks();
+        SimAttacks(base_name);
 
   return 0;
 }

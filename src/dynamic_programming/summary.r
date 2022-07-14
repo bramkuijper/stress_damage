@@ -10,10 +10,13 @@ source(file.path(script.dir,"src/dynamic_programming/stress_file_functions.r"))
 # obtain a list of all files
 all.files <- list.files(path="."
         ,recursive=T
-        ,pattern="^stressL.*K\\d.*\\.txt")
+        ,pattern="^stress_strategy.*\\.txt")
+        #        ,pattern="^stressL.*Kfec\\d.*\\.txt")
 
 
 summary.data <- NULL
+
+fwdcalc.data <- T
 
 for (filename_idx in 1:length(all.files))
 {
@@ -29,19 +32,27 @@ for (filename_idx in 1:length(all.files))
     params <- read.parameters(filename_i)
 
     attack.file.name <- gsub(
-            pattern="stress"
+            pattern="stress_strategy"
             ,replacement="simAttacks"
             ,x=filename_i)
 
-    data.attack <- read.attack.file(attack.file.name)
+    data.attack <- read.attack.file(filename=attack.file.name)
    
     # get the fwd calc data 
     fwdcalc.file.name <- gsub(
-            pattern="stress"
+            pattern="stress_strategy"
             ,replacement="fwdCalc"
             ,x=filename_i)
     
-    fwdcalc.data <- read.fwdcalc(fwdcalc.file.name)
+    if (fwdcalc.data && file.exists(fwdcalc.file.name))
+    {
+        fwdcalc.data <- read.fwdcalc(fwdcalc.file.name)
+    }
+    else
+    {
+        fwdcalc.data <- F
+    }
+    
 
     # maximum hormone after stressor: chronic
     max.h <- data.attack[
@@ -86,7 +97,10 @@ for (filename_idx in 1:length(all.files))
     params["file"] <- filename_i
 
     # add fwdcalc data
-    params <- cbind(params,fwdcalc.data)
+    if (fwdcalc.data)
+    {
+        params <- cbind(params,fwdcalc.data)
+    }
 
     summary.data <- rbind(summary.data,params)
 }
