@@ -11,6 +11,7 @@ suppressPackageStartupMessages(library("viridis"))
 suppressPackageStartupMessages(library("here"))
 
 # load file with general functions
+# to deal with the files coming out of the DP programme
 script.dir <- here()
 source(file.path(script.dir,
                 "src/dynamic_programming/stress_file_functions.r"))
@@ -18,10 +19,13 @@ source(file.path(script.dir,
 
 #### WORK OUT THE FILENAMES ####
 
-# get the file containing the data which we want
-# to plot from the command line
-args = commandArgs(trailingOnly=TRUE)
-strategy.file.name <- args[[1]]
+if (!exists("strategy.file.name"))
+{
+    # get the file containing the data which we want
+    # to plot from the command line
+    args = commandArgs(trailingOnly=TRUE)
+    strategy.file.name <- args[[1]]
+}
 
 # obtain file name without final extension (.txt)
 # using files::before_last_dot()
@@ -30,9 +34,11 @@ strategy.file.base <- before_last_dot(strategy.file.name)
 # from given file name obtain the simAttack file
 # by replacing stress for simAttacks
 attack.file.name <- gsub(
-        pattern="stress_strategy"
+        pattern="stress_"
         ,replacement="simAttacks"
         ,x=strategy.file.name)
+
+
 
 plot.file.name <- paste0("plot_",basename(strategy.file.base),".pdf")
 
@@ -92,14 +98,30 @@ list.plots <- c(list.plots, list(ggplot(data=data.strategy) +
         theme_classic() +
         ggtitle("Hormone strategy over tau and damage")))
 
-# make annotation
-param.str <- paste0(
-        "pLeave: ",params["pLeave"],",",
-        " pArrive: ",params["pArrive"],",",
-        " repair: ",params["repair"],",",
-        " pAtt: ",params["pAttack"],",",
-        " maxTs: ",params["maxTs"],","
-        )
+# make annotation in the plot
+# first provide a map of variables we want to plot
+params.to.list <- c("pLeave"
+                    ,"pArrive"
+                    ,"repair"
+                    ,"pAttack"
+                    ,"maxT"
+                    ,"maxTs")
+
+param.str <- ""
+for (param.idx in 1:length(params.to.list))
+{
+  param.i <- params.to.list[[param.idx]]
+  
+  if (param.i %in% names(params))
+  {
+    param.str <- paste0(param.str
+                        ,ifelse(str_length(param.str) > 0, ", ", "")
+                        ,param.i
+                        ,": "
+                        ,params[param.i])
+  }
+}
+
 
 autocorr <- 1.0 - (params["pLeave"] + params["pArrive"])
 risk <- params["pArrive"] / (params["pLeave"] + params["pArrive"])

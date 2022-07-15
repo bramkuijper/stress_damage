@@ -52,9 +52,9 @@ const double hslope   = 20.0;     // slope parameter controlling increase in dam
 double repair      = 1;      
 int replicate = 1;
 
-const double K        = 0.001;   // parameter K controlling increase in mortality with damage level
+const double K        = 0.0;   // parameter K controlling increase in mortality with damage level
 double Kfec        = 0.001;   // parameter K controlling increase in mortality with damage level
-const int maxD        = (1.0-mu0)/K; // maximum damage level
+const int maxD        = 998; // maximum damage level
 const int maxI        = 100000;   // maximum number of iterations
 const int maxT        = 50;     // maximum number of time steps since last saw predator
 const int maxH        = 100;     // maximum hormone level
