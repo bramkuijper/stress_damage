@@ -10,8 +10,11 @@ class Individual
         std::vector < std::vector < double > > hormone_strategy;
 
         double damage = 0.0;
+        int time_since_stressor = 50;
 
-        Individual();
+        Individual(int const max_damage
+                ,int const max_time_since_stressor
+                ,double const hormone_init);
 
         // copy constructor
         Individual(Individual const &other);
