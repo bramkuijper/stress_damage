@@ -17,6 +17,7 @@ Simulation::Simulation(Parameters const &params) :
             ,params.hormone_init)}
 {}
 
+// actuall run the simulation
 void Simulation::run()
 {
     // each individual can expereince
@@ -68,9 +69,10 @@ void Simulation::reproduce()
 } // end void reproduce()
 
 
+// have individuals survive and update their damage
 void Simulation::survive()
 {
-    // auxiliary variables
+    // some auxiliary variables
     double prob_survive, hormone_i, prob_stressor_present; 
     int damage_i;
     int time_since_stressor_i;
@@ -82,7 +84,11 @@ void Simulation::survive()
         // express damage and get time since individual last encountered 
         // stressor
         damage_i = Pop[individual_idx].damage;
+        
         time_since_stressor_i = Pop[individual_idx].time_since_stressor;
+
+        // express the hormone 
+        hormone_i = Pop[individual_idx].hormone_strategy[damage_i][time_since_stressor_i];
 
         // prob_survive baseline is 1.0 - mu
         prob_survive = 1.0 - std::min(1.0, params.background_mortality + 
@@ -98,9 +104,6 @@ void Simulation::survive()
         if (uniform(rng_r) < prob_stressor_present && 
                 uniform(rng_r) < params.p_attack)
         {
-            // express damage
-            hormone_i = Pop[individual_idx].hormone_strategy[damage_i][time_since_stressor_i];
-
             prob_survive *= 1.0 - prob_killed(hormone_i);
             
             Pop[individual_idx].time_since_stressor = 1;
@@ -115,6 +118,16 @@ void Simulation::survive()
             Pop.erase(Pop.begin() + individual_idx);
             --individual_idx;
         }
+
+        // now update damage for the next time step
+        Pop[individual_idx].damage = 
+            max(0.0,
+                    min(double(max_damage), 
+                            double(damage_i) + 
+                                params.hslope*(params.hmin-hormone_i)*(params.hmin-hormone_i) 
+                                - repair)
+                    )
+
     } // end for (int individual_idx = 0; 
 
 } // end Simulation::survive()
