@@ -2,6 +2,7 @@
 #define _INDIVIDUAL_HPP
 
 #include <vector>
+#include <random>
 #include "parameters.hpp"
 
 class Individual
@@ -18,6 +19,12 @@ class Individual
 
         // copy constructor
         Individual(Individual const &other);
+
+        // birth constructor
+        Individual(Individual const &other
+                ,Parameters &const params
+                ,std::mt19937 &rng_r
+                );
 
         // overloaded assignment operator
         void operator=(Individual const &other);

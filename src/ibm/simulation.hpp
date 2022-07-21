@@ -26,6 +26,8 @@ class Simulation
         // random seed, so that we could 'replay' the exact
         // same sequence of random numbers for debugging purposes etc
         unsigned int seed;
+
+        unsigned int time_step;
         
         // random number generator
         std::mt19937 rng_r;
@@ -43,6 +45,12 @@ class Simulation
    
         // actually run the simulation
         void run();
+
+        void write_data();
+        void write_parameters();
+        void write_data_headers();
+
+        double prob_killed(double const hormone_level);
 };
 
 #endif

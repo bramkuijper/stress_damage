@@ -11,6 +11,9 @@ class Parameters
 
         double pLeave = 0.5;
         double pArrive = 0.5;
+
+        // slope of the hormone vs prob killed function
+        double alpha = 1.0;
         
         long unsigned max_time = 100;
 
@@ -27,7 +30,7 @@ class Parameters
         unsigned int n = 1000;
 
         double baseline_mortality = 0.002;
-        double pkill = 0.5;
+        double p_attack = 0.5;
 
         std::string base_name; 
 };
